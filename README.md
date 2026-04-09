@@ -85,7 +85,7 @@ ComfyUI model_management.py가 자동으로 VRAM 관리합니다.
 ## 디렉토리 구조
 
 ```
-project3/
+project_root/
 ├── backend/
 │   ├── main.py              # FastAPI 엔드포인트 (/generate, /status)
 │   ├── tasks.py             # Celery 태스크 (generate_ad)
@@ -117,10 +117,8 @@ project3/
 ├── Dockerfile.comfyui       # pytorch:2.5.1-cuda12.4 + ComfyUI + IPAdapter_plus
 ├── Dockerfile.frontend
 └── docs/
-    ├── arch.md              # 시스템 아키텍처 다이어그램
-    ├── decisions.md         # 모델/기술 선택 의사결정 로그
-    ├── guide.md             # 상세 가이드
-    └── plan.md              # 프로젝트 기획
+    └── arch.md              # 시스템 아키텍처 다이어그램
+
 ```
 
 ---
