@@ -1,5 +1,7 @@
 # AI 맞춤형 광고 제작 서비스
 
+<img src="./docs/example.png"/>
+
 생성형 AI를 활용하여 소상공인이 디자인 역량 없이도 광고 이미지와 카피를 자동 제작하는 서비스입니다.
 
 업종과 스타일만 선택하면 ComfyUI가 SDXL(DreamShaper XL) + IP-Adapter로 배경 이미지를 생성하고, GPT-5-mini가 한국어 광고 문구를 작성하며, 제품 사진을 업로드하면 배경 제거 후 자동 합성합니다.
