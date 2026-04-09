@@ -1,1 +1,22 @@
-.env
+# 환경변수
+.env*
+
+# Python
+__pycache__/
+*.pyc
+
+# 모델 파일 (용량 큼)
+*.safetensors
+*.bin
+*.onnx
+models/
+
+# node_modules
+frontend/node_modules/
+
+# 빌드 결과물
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
