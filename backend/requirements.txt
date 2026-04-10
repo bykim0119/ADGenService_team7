@@ -4,9 +4,5 @@ python-multipart
 python-dotenv
 openai
 pillow
-rembg
 celery[redis]
 requests
-transformers
-timm
-accelerate

@@ -51,7 +51,7 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
                 "latent_image": ["4", 0],
                 "seed": seed,
                 "steps": 30,
-                "cfg": 7.5,
+                "cfg": 6.0,
                 "sampler_name": "euler_ancestral",
                 "scheduler": "karras",
                 "denoise": 1.0,
@@ -161,85 +161,6 @@ def _fetch_image(filename: str, subfolder: str, output_type: str) -> bytes:
     resp.raise_for_status()
     return resp.content
 
-
-def _build_plating_workflow(prompt: str, depth_image_name: str) -> dict:
-    """ControlNet Depth SDXL 워크플로우 JSON 구성."""
-    seed = int(time.time() * 1000) % (2 ** 31)
-
-    return {
-        "1": {
-            "class_type": "CheckpointLoaderSimple",
-            "inputs": {"ckpt_name": SDXL_CKPT},
-        },
-        "2": {
-            "class_type": "CLIPTextEncode",
-            "inputs": {"text": prompt, "clip": ["1", 1]},
-        },
-        "3": {
-            "class_type": "CLIPTextEncode",
-            "inputs": {"text": NEGATIVE_PROMPT + ", food, dish, plate", "clip": ["1", 1]},
-        },
-        "4": {
-            "class_type": "EmptyLatentImage",
-            "inputs": {"width": 1024, "height": 1024, "batch_size": 1},
-        },
-        "5": {
-            "class_type": "ControlNetLoader",
-            "inputs": {"control_net_name": CONTROLNET_CKPT},
-        },
-        "6": {
-            "class_type": "LoadImage",
-            "inputs": {"image": depth_image_name},
-        },
-        "7": {
-            "class_type": "ControlNetApplyAdvanced",
-            "inputs": {
-                "positive": ["2", 0],
-                "negative": ["3", 0],
-                "control_net": ["5", 0],
-                "image": ["6", 0],
-                "strength": 0.6,
-                "start_percent": 0.0,
-                "end_percent": 0.85,
-            },
-        },
-        "8": {
-            "class_type": "KSampler",
-            "inputs": {
-                "model": ["1", 0],
-                "positive": ["7", 0],
-                "negative": ["7", 1],
-                "latent_image": ["4", 0],
-                "seed": seed,
-                "steps": 30,
-                "cfg": 7.5,
-                "sampler_name": "euler_ancestral",
-                "scheduler": "karras",
-                "denoise": 1.0,
-            },
-        },
-        "9": {
-            "class_type": "VAEDecode",
-            "inputs": {"samples": ["8", 0], "vae": ["1", 2]},
-        },
-        "10": {
-            "class_type": "SaveImage",
-            "inputs": {"images": ["9", 0], "filename_prefix": "plating"},
-        },
-    }
-
-
-def generate_plating_image(prompt: str, depth_image_bytes: bytes) -> bytes:
-    """
-    ComfyUI ControlNet Depth SDXL로 플레이팅 배경 이미지 생성.
-    depth_image_bytes: ZoeDepth로 생성한 깊이맵 PNG bytes
-    반환: PNG bytes
-    """
-    depth_name = _upload_image(depth_image_bytes)
-    workflow = _build_plating_workflow(prompt, depth_name)
-    prompt_id = _queue_prompt(workflow)
-    filename, subfolder, output_type = _wait_for_result(prompt_id)
-    return _fetch_image(filename, subfolder, output_type)
 
 
 def generate_image(prompt: str, product_image: bytes | None = None) -> bytes:

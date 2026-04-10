@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Utensils, Plus, Home, Megaphone, FolderOpen, Settings, ChefHat } from "lucide-react";
+import { Utensils, Home, Megaphone, FolderOpen, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -27,8 +27,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/", icon: Home, label: "홈" },
-    { href: "/editor?mode=plating", icon: ChefHat, label: "배경 합성" },
-    { href: "/editor?mode=ad", icon: Megaphone, label: "AI 이미지 생성" },
+    { href: "/editor", icon: Megaphone, label: "AI 이미지 생성" },
     { href: "/assets", icon: FolderOpen, label: "에셋 라이브러리" },
     { href: "/settings", icon: Settings, label: "설정" }
   ];
@@ -45,19 +44,13 @@ export function Sidebar() {
       </div>
 
       <div className="mb-8 flex flex-col gap-2 px-1">
-        <Link href="/editor?mode=plating" className="block">
+        <Link href="/editor" className="block">
           <Button className="w-full h-11 rounded-lg font-bold text-[13px] text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
             <span className="relative z-10 flex items-center justify-center gap-2">
-              <ChefHat className="w-4 h-4" />
-              배경 합성
+              <Megaphone className="w-4 h-4" />
+              AI 이미지 생성
             </span>
             <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
-          </Button>
-        </Link>
-        <Link href="/editor?mode=ad" className="block">
-          <Button variant="outline" className="w-full h-11 rounded-lg font-bold text-[13px] border-primary/30 text-primary hover:bg-primary/5 active:scale-[0.98] transition-all">
-            <Plus className="w-4 h-4 mr-2" />
-            AI 이미지 생성
           </Button>
         </Link>
       </div>

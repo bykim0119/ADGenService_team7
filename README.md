@@ -25,7 +25,7 @@
 | 테마 / 스타일 선택 | 카툰 / 실사 / 미니멀 |
 | 광고 이미지 생성 | ComfyUI → SDXL(DreamShaper XL) + IP-Adapter Plus (T4 GPU) |
 | 제품 이미지 합성 | rembg 배경 제거 + IP-Adapter로 스타일 반영 |
-| 광고 문구 생성 | GPT-4o-mini 기반 한국어 카피 자동 생성 (멀티턴 수정 가능) |
+| 광고 문구 생성 | GPT-5-mini 기반 한국어 카피 자동 생성 (멀티턴 수정 가능) |
 
 ### 공통 편집 기능
 
@@ -51,7 +51,7 @@
 | 플레이팅 배경 생성 | SDXL + ControlNet Depth SDXL 1.0 (ComfyUI) |
 | 깊이맵 추출 | ZoeDepth (Intel/zoedepth-nyu, CPU) |
 | 배경 제거 | rembg (U2Net, ONNX Runtime) |
-| LLM | OpenAI GPT-4o-mini (프롬프트 빌드 + 카피 작성) |
+| LLM | OpenAI GPT-5-mini (프롬프트 빌드 + 카피 작성) |
 | 컨테이너 | Docker (ComfyUI GPU pod + CPU backend/worker pod + Next.js frontend pod) |
 | 오케스트레이션 | Kubernetes (GKE, T4 Spot GPU 노드) |
 
@@ -75,8 +75,8 @@
 [Celery Worker]    CPU 노드
       │
       ├── [광고 생성 태스크]
-      │   ├── build_sd_prompt()   → GPT-4o-mini: SDXL 영문 프롬프트 생성
-      │   ├── write_copy()        → GPT-4o-mini: 멀티턴 한국어 카피 생성
+      │   ├── build_sd_prompt()   → GPT-5-mini: SDXL 영문 프롬프트 생성
+      │   ├── write_copy()        → GPT-5-mini: 멀티턴 한국어 카피 생성
       │   └── generate_image()   → ComfyUI: SDXL + IP-Adapter 이미지 생성
       │
       └── [플레이팅 태스크]
@@ -259,4 +259,4 @@ kubectl port-forward deployment/comfyui 8188:8188
 | Intel/zoedepth-nyu | MIT |
 | ComfyUI | GPL-3.0 (서버사이드) |
 | rembg (U2Net) | MIT |
-| GPT-4o-mini (OpenAI API) | 상업 이용 허용 |
+| GPT-5-mini (OpenAI API) | 상업 이용 허용 |

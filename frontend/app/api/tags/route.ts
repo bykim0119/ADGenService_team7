@@ -4,11 +4,15 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://backend-service:8000";
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    const body = await req.json();
 
-    const response = await fetch(`${BACKEND_URL}/plating`, {
+    const response = await fetch(`${BACKEND_URL}/tags`, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_input: body.user_input,
+        category_key: body.category_key || "food",
+      }),
     });
 
     if (!response.ok) {
@@ -19,11 +23,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data = await response.json();
-    // { job_id: string }
-    return NextResponse.json(data);
+    return NextResponse.json(await response.json());
   } catch (error: any) {
-    console.error("Plating proxy error:", error);
     return NextResponse.json(
       { error: "Failed to connect to backend", message: error.message },
       { status: 500 }

@@ -25,7 +25,7 @@ flowchart TD
         end
     end
 
-    OAI["OpenAI API\nGPT-4o-mini"]
+    OAI["OpenAI API\nGPT-5-mini"]
     PVC[("PVC\n모델 저장\n25 Gi")]
 
     Browser -- "로그인 / 회원가입" --> SUPA
@@ -49,7 +49,7 @@ flowchart TD
 flowchart TD
     IN["user_input · category · theme\nproduct_image (optional)"]
 
-    subgraph GPT["OpenAI API (GPT-4o-mini)"]
+    subgraph GPT["OpenAI API (GPT-5-mini)"]
         P1["build_sd_prompt()\n→ 영문 SDXL 프롬프트"]
         P2["write_copy()\n→ 한국어 광고 카피 (멀티턴)"]
     end

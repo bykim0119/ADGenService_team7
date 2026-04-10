@@ -3,7 +3,9 @@ import base64
 import io
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from PIL import Image, ImageOps
+from pydantic import BaseModel
 from celery_app import celery_app
+from pipeline_sdxl import write_copy, generate_tags
 
 app = FastAPI(title="광고 생성 API")
 
@@ -63,21 +65,27 @@ async def generate(
     return {"job_id": task.id}
 
 
-@app.post("/plating")
-async def plating(
-    food_image: UploadFile = File(...),
-    mood_key: str = Form(...),
-    menu_name: str = Form(...),
-):
-    raw_bytes = await food_image.read()
-    food_bytes = _normalize_uploaded_image(raw_bytes, "food_image")
-    food_image_b64 = base64.b64encode(food_bytes).decode()
+class CopyRequest(BaseModel):
+    user_input: str
+    category_key: str = "food"
+    history: list = []
 
-    task = celery_app.send_task(
-        "tasks.plating_ad",
-        args=[food_image_b64, mood_key, menu_name],
-    )
-    return {"job_id": task.id}
+
+class TagRequest(BaseModel):
+    user_input: str
+    category_key: str = "food"
+
+
+@app.post("/tags")
+async def tags(req: TagRequest):
+    result = generate_tags(req.user_input, req.category_key)
+    return {"tags": result}
+
+
+@app.post("/copy")
+async def copy(req: CopyRequest):
+    result = write_copy(req.user_input, req.category_key, req.history)
+    return {"copies": [result["copy"]], "message": result["message"]}
 
 
 @app.get("/status/{job_id}")

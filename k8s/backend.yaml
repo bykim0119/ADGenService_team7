@@ -15,6 +15,12 @@ spec:
       containers:
         - name: backend
           image: asia-east1-docker.pkg.dev/gke-man-projects/ad-gen-project/backend:latest
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ad-secrets
+                  key: OPENAI_API_KEY
           ports:
             - containerPort: 8000
           readinessProbe:
