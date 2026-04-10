@@ -27,7 +27,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/", icon: Home, label: "홈" },
-    { href: "/editor", icon: Megaphone, label: "AI 이미지 생성" },
+    { href: "/editor", icon: Megaphone, label: "AI 광고 생성" },
     { href: "/assets", icon: FolderOpen, label: "에셋 라이브러리" },
     { href: "/settings", icon: Settings, label: "설정" }
   ];
@@ -48,7 +48,7 @@ export function Sidebar() {
           <Button className="w-full h-11 rounded-lg font-bold text-[13px] text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Megaphone className="w-4 h-4" />
-              AI 이미지 생성
+              AI 광고 생성
             </span>
             <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
           </Button>

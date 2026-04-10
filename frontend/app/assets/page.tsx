@@ -31,14 +31,22 @@ const STYLE_LABELS: Record<string, string> = {
 };
 
 const PLATFORM_LABELS: Record<string, string> = {
-  "정사각형 (인스타)": "1:1 (인스타 피드)",
-  "스토리 (세로형)": "9:16 (스토리/릴스)",
-  "와이드 (풍경형)": "16:9 (와이드 광고)",
-  "와이드뷰 (영화)": "21:9 (시네마틱)",
-  "1:1": "1:1 (인스타 피드)",
-  "9:16": "9:16 (스토리/릴스)",
-  "16:9": "16:9 (와이드 광고)",
-  "21:9": "21:9 (시네마틱)"
+  "정사각형 (인스타)": "인스타 피드",
+  "스토리 (세로형)": "인스타 스토리",
+  "와이드 (풍경형)": "유튜브 썸네일",
+  "와이드뷰 (영화)": "배너 광고",
+  "1:1": "인스타 피드",
+  "9:16": "인스타 스토리",
+  "16:9": "유튜브 썸네일",
+  "21:9": "배너 광고",
+  "1:1 (인스타 피드)": "인스타 피드",
+  "9:16 (스토리/릴스)": "인스타 스토리",
+  "16:9 (와이드 광고)": "유튜브 썸네일",
+  "21:9 (시네마틱)": "배너 광고",
+  "인스타 피드": "인스타 피드",
+  "인스타 스토리": "인스타 스토리",
+  "유튜브 썸네일": "유튜브 썸네일",
+  "배너 광고": "배너 광고"
 };
 
 export default function AssetsPage() {
@@ -139,48 +147,51 @@ export default function AssetsPage() {
   };
 
   return (
-    <div className="p-6 md:p-10 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">에셋 라이브러리</h1>
-        <p className="text-[13px] font-medium text-slate-500">관리 중인 모든 브랜드 에셋과 이미지를 확인하세요.</p>
+    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      <div 
+        className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
+        style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
+      >
+        <h1 className="text-3xl font-bold text-on-surface tracking-tight !border-0">에셋 라이브러리</h1>
+        <p className="text-[14px] font-medium text-on-surface/60 !border-0">관리 중인 모든 브랜드 에셋과 광고 디자인을 확인하세요.</p>
       </div>
       
       {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] gap-6">
-          <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary animate-pulse">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] gap-6 animate-in fade-in duration-700">
+          <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary animate-pulse shadow-xl shadow-primary/5">
              <ChefHat className="w-10 h-10" />
           </div>
           <p className="text-[13px] font-bold text-primary/60 tracking-widest uppercase">에셋 로딩 중...</p>
-          <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm">AI가 에셋 라이브러리를 불러오는 중입니다...</p>
+          <p className="text-on-surface/40 text-[11px] font-bold tracking-tight bg-surface-container-lowest px-4 py-1.5 rounded-full border border-surface-container-highest/60 shadow-sm">AI가 에셋 라이브러리를 불러오는 중입니다...</p>
         </div>
       ) : assets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 min-h-[400px]">
-          <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-slate-100 shadow-sm mb-4">
-            <FolderOpen className="w-6 h-6 text-slate-400" />
+        <div className="flex flex-col items-center justify-center border border-dashed border-surface-container-highest/60 rounded-xl bg-surface-container-lowest min-h-[400px]">
+          <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-surface-container-highest/40 shadow-sm mb-4">
+            <FolderOpen className="w-6 h-6 text-on-surface/20" />
           </div>
-          <h3 className="text-[17px] font-semibold text-slate-800">에셋이 비어 있습니다</h3>
-          <p className="text-[13px] text-slate-500 mt-2 max-w-sm text-center leading-relaxed">새로운 광고를 생성하고 에셋을 라이브러리에 저장해보세요.</p>
+          <h3 className="text-[17px] font-semibold text-on-surface/80">에셋이 비어 있습니다</h3>
+          <p className="text-[13px] text-on-surface/40 mt-2 max-w-sm text-center leading-relaxed">새로운 광고를 생성하고 에셋을 라이브러리에 저장해보세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {assets.map((asset) => (
-            <Card key={asset.id} className="group overflow-hidden rounded-xl border border-slate-100 hover:border-slate-200 transition-all duration-300 hover:shadow-md flex flex-col bg-white">
-              <div className="aspect-square relative overflow-hidden bg-slate-100">
+            <Card key={asset.id} className="group overflow-hidden rounded-xl border border-surface-container-highest/60 hover:border-primary/30 transition-all duration-300 hover:shadow-lg flex flex-col bg-white">
+              <div className="aspect-square relative overflow-hidden bg-surface-container-low">
                 <img 
                   src={asset.generated_image_url} 
                   alt={asset.campaigns?.menu_name || "Generated Asset"} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
-                  <Badge className="bg-slate-900/90 text-white border-0 text-[10px] px-2.5 py-1.5 font-bold shadow-md">
-                    {PLATFORM_LABELS[asset.platform] || asset.platform || "1:1 (인스타 피드)"}
+                  <Badge className="bg-on-surface/90 text-white border-0 text-[10px] px-2.5 py-1.5 font-bold shadow-md backdrop-blur-md">
+                    {PLATFORM_LABELS[asset.platform] || asset.platform || "인스타 피드"}
                   </Badge>
-                  <Badge className="bg-white/90 text-primary border-0 text-[9px] px-2 py-0.5 font-bold shadow-sm">
+                  <Badge className="bg-white/90 text-primary border-0 text-[9px] px-2 py-0.5 font-bold shadow-sm backdrop-blur-md">
                     {STYLE_LABELS[asset.campaigns?.style_id] || asset.campaigns?.style_id?.toUpperCase() || "STYLE"}
                   </Badge>
                 </div>
                 
-                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center gap-3">
+                <div className="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center gap-3">
                   <Button 
                     variant="destructive" 
                     size="icon" 
@@ -192,7 +203,7 @@ export default function AssetsPage() {
                   </Button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); handlePreview(asset.generated_image_url); }} 
-                    className="w-10 h-10 rounded-full bg-white text-slate-900 hover:bg-slate-100 flex items-center justify-center transition-all shadow-lg active:scale-95"
+                    className="w-10 h-10 rounded-full bg-white text-on-surface hover:bg-surface-container-highest flex items-center justify-center transition-all shadow-lg active:scale-95"
                     title="원본 보기"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -208,10 +219,10 @@ export default function AssetsPage() {
               </div>
               
               <div className="p-5 flex flex-col gap-2">
-                <h4 className="font-bold text-[15px] text-slate-800 line-clamp-1">
+                <h4 className="font-bold text-[15px] text-on-surface line-clamp-1">
                   {asset.campaigns?.menu_name || "이름 없는 메뉴"}
                 </h4>
-                <div className="flex items-center text-slate-400 text-[11px] font-bold tracking-tight">
+                <div className="flex items-center text-on-surface/30 text-[11px] font-bold tracking-tight">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
                   {new Date(asset.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
