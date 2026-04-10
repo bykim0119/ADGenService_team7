@@ -39,6 +39,22 @@ async def generate(
     return {"job_id": task.id}
 
 
+@app.post("/plating")
+async def plating(
+    food_image: UploadFile = File(...),
+    mood_key: str = Form(...),
+    menu_name: str = Form(...),
+):
+    food_bytes = await food_image.read()
+    food_image_b64 = base64.b64encode(food_bytes).decode()
+
+    task = celery_app.send_task(
+        "tasks.plating_ad",
+        args=[food_image_b64, mood_key, menu_name],
+    )
+    return {"job_id": task.id}
+
+
 @app.get("/status/{job_id}")
 async def status(job_id: str):
     result = celery_app.AsyncResult(job_id)

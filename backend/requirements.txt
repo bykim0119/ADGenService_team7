@@ -7,3 +7,6 @@ pillow
 rembg
 celery[redis]
 requests
+transformers
+timm
+accelerate

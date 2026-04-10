@@ -12,11 +12,12 @@ COMFYUI_PATH = os.environ.get("COMFYUI_PATH", "/workspace/ComfyUI")
 MODELS_DIR = Path(COMFYUI_PATH) / "models"
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
-CHECKPOINTS_DIR = MODELS_DIR / "checkpoints"
-IPADAPTER_DIR   = MODELS_DIR / "ipadapter"
-CLIP_VISION_DIR = MODELS_DIR / "clip_vision"
+CHECKPOINTS_DIR  = MODELS_DIR / "checkpoints"
+IPADAPTER_DIR    = MODELS_DIR / "ipadapter"
+CLIP_VISION_DIR  = MODELS_DIR / "clip_vision"
+CONTROLNET_DIR   = MODELS_DIR / "controlnet"
 
-for d in [CHECKPOINTS_DIR, IPADAPTER_DIR, CLIP_VISION_DIR]:
+for d in [CHECKPOINTS_DIR, IPADAPTER_DIR, CLIP_VISION_DIR, CONTROLNET_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -81,5 +82,28 @@ download(
     repo_id="h94/IP-Adapter",
     filename="models/image_encoder/model.safetensors",
 )
+
+# ControlNet Depth SDXL
+print("▶ ControlNet Depth SDXL 1.0")
+download(
+    CONTROLNET_DIR / "controlnet-depth-sdxl-1.0.safetensors",
+    repo_id="diffusers/controlnet-depth-sdxl-1.0",
+    filename="diffusion_pytorch_model.fp16.safetensors",
+)
+
+# ZoeDepth (CPU 깊이맵 추정 — HuggingFace snapshot으로 Worker 컨테이너에 캐시)
+print("▶ ZoeDepth-NYU (CPU 깊이맵)")
+ZOEDEPTH_CACHE = Path("/workspace/hf_cache/zoedepth-nyu")
+if not ZOEDEPTH_CACHE.exists():
+    print("  [GET] Intel/zoedepth-nyu → snapshot_download")
+    from huggingface_hub import snapshot_download
+    snapshot_download(
+        repo_id="Intel/zoedepth-nyu",
+        token=HF_TOKEN,
+        cache_dir="/workspace/hf_cache",
+    )
+    print("  [OK] ZoeDepth-NYU 캐시 완료")
+else:
+    print("  [SKIP] ZoeDepth-NYU 이미 존재")
 
 print("✓ 모든 모델 준비 완료")

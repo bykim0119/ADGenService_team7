@@ -16,7 +16,21 @@ spec:
         - name: frontend
           image: asia-east1-docker.pkg.dev/gke-man-projects/ad-gen-project/frontend:latest
           ports:
-            - containerPort: 80
+            - containerPort: 3000
+          env:
+            - name: BACKEND_URL
+              value: "http://backend-service:8000"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ad-secrets
+                  key: OPENAI_API_KEY
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -27,5 +41,5 @@ spec:
     app: frontend
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 3000
   type: LoadBalancer

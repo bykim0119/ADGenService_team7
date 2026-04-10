@@ -28,10 +28,39 @@ IP_CLIP_ENCODER_SUBFOLDER = "models/image_encoder"
 _ip_pipe = None
 _ip_pipe_lock = threading.Lock()
 _rembg_session = None
+_zoedepth_model = None
+_zoedepth_lock = threading.Lock()
 
 
 def is_model_ready() -> bool:
     return _ip_pipe is not None
+
+
+def _get_zoedepth():
+    global _zoedepth_model
+    if _zoedepth_model is not None:
+        return _zoedepth_model
+    with _zoedepth_lock:
+        if _zoedepth_model is not None:
+            return _zoedepth_model
+        from transformers import pipeline as hf_pipeline
+        _zoedepth_model = hf_pipeline(
+            task="depth-estimation",
+            model="Intel/zoedepth-nyu",
+            device="cpu",
+        )
+    return _zoedepth_model
+
+
+def generate_depth_map(image_bytes: bytes) -> bytes:
+    """음식 사진 → ZoeDepth 깊이맵(그레이스케일 PNG) 생성."""
+    food_img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    depth_pipe = _get_zoedepth()
+    result = depth_pipe(food_img)
+    depth_img = result["depth"].convert("L").resize(food_img.size, Image.LANCZOS)
+    buf = io.BytesIO()
+    depth_img.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 def _get_rembg_session():
