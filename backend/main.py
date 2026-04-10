@@ -91,5 +91,8 @@ async def status(job_id: str):
     elif result.state == "SUCCESS":
         return {"status": "done", **result.result}
     elif result.state == "FAILURE":
-        return {"status": "error", "detail": str(result.result)}
+        detail = str(result.result)
+        if "SYSTEM_ERROR:" in detail:
+            return {"status": "failed_system", "detail": detail}
+        return {"status": "failed_input", "detail": detail}
     return {"status": result.state.lower()}

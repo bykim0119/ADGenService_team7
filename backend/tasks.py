@@ -34,7 +34,10 @@ def generate_ad(
 
     # 이미지 생성: ComfyUI API 호출
     # 텍스트 오버레이는 프론트엔드 Fabric.js 캔버스에서 처리
-    image_bytes = generate_image(sd_prompt, product_bytes)
+    try:
+        image_bytes = generate_image(sd_prompt, product_bytes)
+    except Exception as e:
+        raise RuntimeError(f"SYSTEM_ERROR: image generation failed — {e}") from e
 
     return {
         "image": base64.b64encode(image_bytes).decode(),
@@ -52,7 +55,10 @@ def plating_ad(self, food_image_b64: str, mood_key: str, menu_name: str):
 
     # 1. ZoeDepth로 깊이맵 생성 (CPU)
     logger.warning("[PLATING] ZoeDepth 깊이맵 생성 중...")
-    depth_bytes = generate_depth_map(food_bytes)
+    try:
+        depth_bytes = generate_depth_map(food_bytes)
+    except Exception as e:
+        raise RuntimeError(f"SYSTEM_ERROR: depth map generation failed — {e}") from e
 
     # 2. 무드 프롬프트 조합
     mood = MOODS.get(mood_key, MOODS["white"])
@@ -64,11 +70,17 @@ def plating_ad(self, food_image_b64: str, mood_key: str, menu_name: str):
 
     # 3. ComfyUI ControlNet Depth로 배경 생성
     logger.warning("[PLATING] ComfyUI ControlNet Depth 배경 생성 중...")
-    background_bytes = generate_plating_image(prompt, depth_bytes)
+    try:
+        background_bytes = generate_plating_image(prompt, depth_bytes)
+    except Exception as e:
+        raise RuntimeError(f"SYSTEM_ERROR: background generation failed — {e}") from e
 
     # 4. 음식 사진 누끼 (rembg)
     logger.warning("[PLATING] rembg 누끼 처리 중...")
-    food_no_bg = remove(food_bytes, session=_get_rembg_session())
+    try:
+        food_no_bg = remove(food_bytes, session=_get_rembg_session())
+    except Exception as e:
+        raise RuntimeError(f"SYSTEM_ERROR: background removal failed — {e}") from e
 
     # 5. PIL 합성
     logger.warning("[PLATING] PIL 합성 중...")
