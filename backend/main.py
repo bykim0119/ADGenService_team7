@@ -1,9 +1,30 @@
 import json
 import base64
-from fastapi import FastAPI, UploadFile, File, Form
+import io
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from PIL import Image, ImageOps
 from celery_app import celery_app
 
 app = FastAPI(title="광고 생성 API")
+
+
+def _normalize_uploaded_image(file_bytes: bytes, field_name: str) -> bytes:
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail=f"{field_name} is empty")
+
+    try:
+        image = Image.open(io.BytesIO(file_bytes))
+        image = ImageOps.exif_transpose(image)
+        image = image.convert("RGB")
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{field_name} is not a valid image file",
+        )
+
+    buf = io.BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 @app.get("/health")
@@ -25,7 +46,10 @@ async def generate(
     font_size_ratio: float = Form(0.052),
 ):
     history_list = json.loads(history)
-    product_bytes = await product_image.read() if product_image else None
+    product_bytes = None
+    if product_image:
+        raw_bytes = await product_image.read()
+        product_bytes = _normalize_uploaded_image(raw_bytes, "product_image")
     product_image_b64 = base64.b64encode(product_bytes).decode() if product_bytes else None
 
     task = celery_app.send_task(
@@ -45,7 +69,8 @@ async def plating(
     mood_key: str = Form(...),
     menu_name: str = Form(...),
 ):
-    food_bytes = await food_image.read()
+    raw_bytes = await food_image.read()
+    food_bytes = _normalize_uploaded_image(raw_bytes, "food_image")
     food_image_b64 = base64.b64encode(food_bytes).decode()
 
     task = celery_app.send_task(
@@ -66,5 +91,8 @@ async def status(job_id: str):
     elif result.state == "SUCCESS":
         return {"status": "done", **result.result}
     elif result.state == "FAILURE":
-        return {"status": "error", "detail": str(result.result)}
+        detail = str(result.result)
+        if "SYSTEM_ERROR:" in detail:
+            return {"status": "failed_system", "detail": detail}
+        return {"status": "failed_input", "detail": detail}
     return {"status": result.state.lower()}

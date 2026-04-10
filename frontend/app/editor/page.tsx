@@ -487,6 +487,14 @@ export default function EditorPage() {
         if (data.status === "done" && data.image) {
           clearInterval(pollingRef.current!);
           onDone(data);
+        } else if (data.status === "failed_input") {
+          clearInterval(pollingRef.current!);
+          toast.error("입력 이미지를 확인해주세요: " + (data.detail || "이미지 형식이 올바르지 않습니다"));
+          setIsCooking(false);
+        } else if (data.status === "failed_system") {
+          clearInterval(pollingRef.current!);
+          toast.error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+          setIsCooking(false);
         } else if (data.status === "error") {
           clearInterval(pollingRef.current!);
           toast.error("이미지 생성 실패: " + (data.detail || "알 수 없는 오류"));
