@@ -27,8 +27,8 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/", icon: Home, label: "홈" },
-    { href: "/editor?mode=plating", icon: ChefHat, label: "플레이팅" },
-    { href: "/editor?mode=ad", icon: Megaphone, label: "광고 생성" },
+    { href: "/editor?mode=plating", icon: ChefHat, label: "배경 합성" },
+    { href: "/editor?mode=ad", icon: Megaphone, label: "AI 이미지 생성" },
     { href: "/assets", icon: FolderOpen, label: "에셋 라이브러리" },
     { href: "/settings", icon: Settings, label: "설정" }
   ];
