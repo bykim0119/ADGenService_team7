@@ -577,8 +577,8 @@ export default function EditorPage() {
   /* ─── JSX ─── */
   return (
     <div className="flex h-full overflow-hidden bg-surface">
-      {/* ════════════════════ LEFT PANEL ════════════════════ */}
-      <div className="w-[480px] flex-shrink-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-4 p-5 bg-surface-container-lowest/30">
+      {/* ════════════════════ LEFT PANEL (설정) ════════════════════ */}
+      <div className="w-64 flex-shrink-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-3 p-4 bg-surface-container-lowest/30">
 
         {/* 제품 이미지 업로드 */}
         <Card
@@ -624,14 +624,13 @@ export default function EditorPage() {
             {/* 업종 */}
             <div>
               <FieldLabel>업종 카테고리</FieldLabel>
-              <div className="grid grid-cols-3 gap-1.5">
-                {CATEGORIES.map((c, idx) => (
+              <div className="flex flex-col gap-1">
+                {CATEGORIES.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setCategoryKey(c.id)}
                     className={cn(
-                      'py-2 px-2 rounded-lg text-[11px] font-bold border transition-all duration-200 whitespace-nowrap',
-                      idx === 4 && 'col-span-3',
+                      'w-full py-2 px-3 rounded-lg text-[11px] font-bold border transition-all duration-200 text-left',
                       categoryKey === c.id
                         ? 'bg-primary/5 border-primary text-primary shadow-sm'
                         : 'bg-surface-container-lowest border-surface-container-highest/60 text-on-surface/60 hover:bg-primary/5 hover:border-primary/30'
@@ -646,13 +645,13 @@ export default function EditorPage() {
             {/* 테마 */}
             <div>
               <FieldLabel>디자인 테마</FieldLabel>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="flex flex-col gap-1">
                 {THEMES.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setThemeKey(t.id)}
                     className={cn(
-                      'py-2 rounded-lg text-[11px] font-bold border transition-all duration-200',
+                      'w-full py-2 px-3 rounded-lg text-[11px] font-bold border transition-all duration-200 text-left',
                       themeKey === t.id
                         ? 'bg-primary/5 border-primary text-primary shadow-sm'
                         : 'bg-surface-container-lowest border-surface-container-highest/60 text-on-surface/60 hover:bg-primary/5 hover:border-primary/30'
