@@ -24,10 +24,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const ASPECT_RATIOS = [
-  { id: '1:1', name: '1:1', ratio: 1 / 1, class: 'aspect-square' },
-  { id: '9:16', name: '9:16', ratio: 9 / 16, class: 'aspect-[9/16]' },
-  { id: '16:9', name: '16:9', ratio: 16 / 9, class: 'aspect-video' },
-  { id: '21:9', name: '21:9', ratio: 21 / 9, class: 'aspect-[21/9]' },
+  { id: '1:1', name: '인스타 피드', ratio: 1 / 1, class: 'aspect-square' },
+  { id: '9:16', name: '인스타 스토리', ratio: 9 / 16, class: 'aspect-[9/16]' },
+  { id: '16:9', name: '유튜브 썸네일', ratio: 16 / 9, class: 'aspect-video' },
+  { id: '21:9', name: '배너 광고', ratio: 21 / 9, class: 'aspect-[21/9]' },
 ];
 
 const INITIAL_PREVIEW_IMG =
@@ -693,19 +693,19 @@ export default function EditorPage() {
         <Card className="p-4 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <SectionHeading>미리보기</SectionHeading>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
               {ASPECT_RATIOS.map((r, i) => (
                 <button
                   key={r.id}
                   onClick={() => handleRatioChange(i)}
                   className={cn(
-                    'px-2 py-1 text-[10px] font-bold rounded-md transition-all duration-200 border border-transparent',
+                    'px-2 py-1 text-[9px] font-bold rounded-md transition-all duration-200 border border-transparent whitespace-nowrap',
                     activeRatioIdx === i
                       ? 'bg-primary/5 border-primary text-primary'
                       : 'text-on-surface/40 hover:bg-primary/5 hover:text-primary hover:border-primary/30'
                   )}
                 >
-                  {r.id}
+                  {r.name}
                 </button>
               ))}
             </div>
