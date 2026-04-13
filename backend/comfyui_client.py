@@ -79,8 +79,8 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None, ip_adapter_wei
                 "negative": ["3", 0],
                 "latent_image": ["4", 0],
                 "seed": seed,
-                "steps": 30,
-                "cfg": 6.0,
+                "steps": 24,
+                "cfg": 7.5,
                 "sampler_name": "euler_ancestral",
                 "scheduler": "karras",
                 "denoise": 1.0,
@@ -251,3 +251,36 @@ def generate_image(
     workflow = _build_workflow(prompt, uploaded_name, ip_adapter_weight)
     filename, subfolder, output_type = _run_with_progress(workflow, job_id)
     return _fetch_image(filename, subfolder, output_type)
+
+
+def warmup() -> None:
+    """
+    Celery 워커 시작 시 호출. 최소 워크플로우로 ComfyUI에 더미 요청을 보내
+    SDXL 체크포인트를 GPU VRAM에 미리 올려둔다.
+    실패해도 워커 시작을 막지 않는다.
+    """
+    try:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("[warmup] ComfyUI 모델 프리로드 시작...")
+
+        # 1스텝 최소 워크플로우 (빠르게 체크포인트만 로드)
+        workflow = {
+            "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": SDXL_CKPT}},
+            "2": {"class_type": "CLIPTextEncode",         "inputs": {"text": "warmup", "clip": ["1", 1]}},
+            "3": {"class_type": "CLIPTextEncode",         "inputs": {"text": "warmup", "clip": ["1", 1]}},
+            "4": {"class_type": "EmptyLatentImage",        "inputs": {"width": 512, "height": 512, "batch_size": 1}},
+            "5": {"class_type": "KSampler", "inputs": {
+                "model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0],
+                "latent_image": ["4", 0], "seed": 0, "steps": 1,
+                "cfg": 1.0, "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0,
+            }},
+            "6": {"class_type": "VAEDecode",  "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+            "7": {"class_type": "SaveImage",  "inputs": {"images": ["6", 0], "filename_prefix": "warmup"}},
+        }
+
+        _run_with_progress(workflow, job_id=None)
+        logger.info("[warmup] 완료 — 모델이 VRAM에 캐싱되었습니다.")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"[warmup] 실패 (무시): {e}")

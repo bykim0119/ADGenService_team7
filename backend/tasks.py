@@ -1,11 +1,18 @@
 import base64
 from concurrent.futures import ThreadPoolExecutor
 from celery.utils.log import get_task_logger
+from celery.signals import worker_ready
 from celery_app import celery_app
 from pipeline_sdxl import build_sd_prompt, write_copy, generate_tags
-from comfyui_client import generate_image
+from comfyui_client import generate_image, warmup
 
 logger = get_task_logger(__name__)
+
+
+@worker_ready.connect
+def on_worker_ready(sender, **kwargs):
+    """워커 준비 완료 시 ComfyUI 모델을 VRAM에 미리 로드."""
+    warmup()
 
 
 @celery_app.task(bind=True, name="tasks.generate_ad")
