@@ -81,6 +81,9 @@ export default function EditorPage() {
   const [categoryKey, setCategoryKey] = useState('food');
   const [themeKey, setThemeKey] = useState('realistic');
   const [adUserInput, setAdUserInput] = useState('');
+  const [ipAdapterWeight, setIpAdapterWeight] = useState(0.7);
+  const [hasProductImage, setHasProductImage] = useState(false);
+  const [genProgress, setGenProgress] = useState(0);
   const [adHistory, setAdHistory] = useState<Array<{user_input: string; copy: string; message: string}>>([]);
 
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -293,12 +296,15 @@ export default function EditorPage() {
 
   const pollJobResult = (jobId: string, onDone: (result: Record<string, any>) => void) => {
     if (pollingRef.current) clearInterval(pollingRef.current);
+    setGenProgress(0);
     pollingRef.current = setInterval(async () => {
       try {
         const res = await fetch(`/api/status/${jobId}`);
         const data = await res.json();
+        if (typeof data.progress === "number") setGenProgress(data.progress);
         if (data.status === "done" && data.image) {
           clearInterval(pollingRef.current!);
+          setGenProgress(100);
           onDone(data);
         } else if (data.status === "failed_input") {
           clearInterval(pollingRef.current!);
@@ -330,7 +336,10 @@ export default function EditorPage() {
       formData.append("category_key", categoryKey);
       formData.append("theme_key", themeKey);
       formData.append("history", JSON.stringify(adHistory));
-      if (adProductFileRef.current) formData.append("product_image", adProductFileRef.current);
+      if (adProductFileRef.current) {
+        formData.append("product_image", adProductFileRef.current);
+        formData.append("ip_adapter_weight", String(ipAdapterWeight));
+      }
 
       const response = await fetch("/api/generate", { method: "POST", body: formData });
       const data = await response.json();
@@ -458,6 +467,7 @@ export default function EditorPage() {
               const file = e.target.files?.[0];
               if (file) {
                 adProductFileRef.current = file;
+                setHasProductImage(true);
                 const r = new FileReader();
                 r.onload = (ev) => { setPreviewImage(ev.target?.result as string); setGeneratedImage(null); };
                 r.readAsDataURL(file);
@@ -502,6 +512,27 @@ export default function EditorPage() {
           <Card className="p-6 rounded-2xl border-none shadow-sm bg-white/70 backdrop-blur-sm">
             <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4 text-primary/60">생성</h2>
             <p className="text-[11px] text-slate-400 mb-4">제품 이미지를 업로드하면 IP-Adapter로 스타일이 반영됩니다.</p>
+            {hasProductImage && (
+              <div className="mb-4 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em]">이미지 반영 강도</label>
+                  <span className="text-[11px] font-bold text-primary">{ipAdapterWeight.toFixed(1)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1.0"
+                  step="0.1"
+                  value={ipAdapterWeight}
+                  onChange={(e) => setIpAdapterWeight(parseFloat(e.target.value))}
+                  className="w-full h-1.5 accent-primary cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] text-slate-300 font-bold mt-0.5">
+                  <span>프롬프트 위주</span>
+                  <span>이미지 위주</span>
+                </div>
+              </div>
+            )}
             <Button onClick={handleGenerateCopy} disabled={isGeneratingCopy} className="w-full h-11 mb-3 rounded-lg bg-slate-900 text-white font-bold text-[13px] shadow-lg shadow-black/10 hover:bg-slate-800 active:scale-[0.98] transition-all overflow-hidden relative group">
               <span className="relative z-10 flex items-center justify-center gap-2">{isGeneratingCopy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} 광고 문구 생성</span>
             </Button>
@@ -526,12 +557,27 @@ export default function EditorPage() {
               <div className={cn("bg-white rounded-[40px] shadow-2xl overflow-hidden border-8 border-white relative transition-all duration-300", ASPECT_RATIOS[activeRatioIdx].class)} style={{ width: '100%', maxWidth: '460px' }}>
                 <div className="w-full h-full flex items-center justify-center overflow-hidden bg-slate-50"><canvas ref={fabricCanvasElRef} /></div>
                 {isCooking && (
-                  <div className="absolute inset-0 z-[100] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-500 p-10 text-center gap-6 rounded-[32px]">
-                    <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary animate-pulse shadow-inner border border-primary/5">
+                  <div className="absolute inset-0 z-[100] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-500 p-10 text-center gap-5 rounded-[32px]">
+                    <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary shadow-inner border border-primary/5">
                       <ImageIcon className="w-10 h-10" />
                     </div>
-                    <p className="text-[13px] font-bold text-primary/60 tracking-widest uppercase">AI 이미지 생성 중...</p>
-                    <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-2 rounded-full border border-slate-100 shadow-sm">AI가 최적의 광고 이미지를 생성하고 있습니다</p>
+                    <div className="flex flex-col items-center gap-2 w-full max-w-[200px]">
+                      <div className="flex justify-between w-full">
+                        <p className="text-[11px] font-bold text-primary/60 tracking-widest uppercase">
+                          {genProgress < 5 ? "준비 중" : genProgress < 15 ? "모델 로딩" : genProgress < 91 ? "이미지 생성" : "후처리 중"}
+                        </p>
+                        <p className="text-[11px] font-bold text-primary">{genProgress}%</p>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-500"
+                          style={{ width: `${genProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-2 rounded-full border border-slate-100 shadow-sm">
+                      {genProgress < 15 ? "모델과 설정을 불러오는 중입니다" : genProgress < 91 ? `샘플링 진행 중... (${genProgress}%)` : "이미지를 마무리하는 중입니다"}
+                    </p>
                   </div>
                 )}
               </div>

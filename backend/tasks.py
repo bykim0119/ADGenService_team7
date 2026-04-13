@@ -20,6 +20,7 @@ def generate_ad(
     font_name,
     text_color,
     font_size_ratio,
+    ip_adapter_weight=0.7,
 ):
     product_bytes = base64.b64decode(product_image_b64) if product_image_b64 else None
 
@@ -32,7 +33,7 @@ def generate_ad(
     # 이미지 생성: ComfyUI API 호출
     # 텍스트 오버레이는 프론트엔드 Fabric.js 캔버스에서 처리
     try:
-        image_bytes = generate_image(sd_prompt, product_bytes)
+        image_bytes = generate_image(sd_prompt, product_bytes, ip_adapter_weight, self.request.id)
     except Exception as e:
         raise RuntimeError(f"SYSTEM_ERROR: image generation failed — {e}") from e
 

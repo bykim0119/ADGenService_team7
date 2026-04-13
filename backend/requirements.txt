@@ -6,3 +6,5 @@ openai
 pillow
 celery[redis]
 requests
+websocket-client
+redis
