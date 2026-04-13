@@ -15,6 +15,7 @@ spec:
       containers:
         - name: worker
           image: asia-east1-docker.pkg.dev/gke-man-projects/ad-gen-project/backend:latest
+          imagePullPolicy: Always
           command: ["celery", "-A", "celery_app", "worker", "--loglevel=info", "--concurrency=1", "-P", "solo"]
           env:
             - name: OPENAI_API_KEY

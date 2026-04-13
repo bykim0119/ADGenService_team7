@@ -88,7 +88,7 @@
         {"name": "LATENT", "type": "LATENT", "links": [8], "slot_index": 0}
       ],
       "properties": {"Node name for S&R": "KSampler"},
-      "widgets_values": [42, "fixed", 30, 6.0, "euler_ancestral", "karras", 1.0]
+      "widgets_values": [42, "fixed", 24, 7.5, "euler_ancestral", "karras", 1.0]
     },
     {
       "id": 7,
@@ -145,7 +145,7 @@
     "_comments_": [
       "=== Project3 Ad Generator — Base Pipeline (Text→Image) ===",
       "Model   : DreamShaper XL (dreamshaper_xl.safetensors)",
-      "Sampler : euler_ancestral / karras / 30 steps / CFG 6.0",
+      "Sampler : euler_ancestral / karras / 24 steps / CFG 7.5",
       "Size    : 1024 × 1024",
       "Positive prompt은 GPT-5-mini로 자동 생성 (pipeline_sdxl.py: build_sd_prompt)",
       "Negative: text, watermark, blurry, low quality, deformed, ugly, nsfw"

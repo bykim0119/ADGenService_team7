@@ -136,7 +136,7 @@
         {"name": "MODEL", "type": "MODEL", "links": [13], "slot_index": 0}
       ],
       "properties": {"Node name for S&R": "IPAdapterAdvanced"},
-      "widgets_values": [0.5, "linear", "concat", 0.0, 1.0, "V only"]
+      "widgets_values": [0.7, "linear", "concat", 0.0, 1.0, "V only"]
     },
     {
       "id": 6,
@@ -156,7 +156,7 @@
         {"name": "LATENT", "type": "LATENT", "links": [8], "slot_index": 0}
       ],
       "properties": {"Node name for S&R": "KSampler"},
-      "widgets_values": [42, "fixed", 30, 6.0, "euler_ancestral", "karras", 1.0]
+      "widgets_values": [42, "fixed", 24, 7.5, "euler_ancestral", "karras", 1.0]
     },
     {
       "id": 7,
@@ -217,9 +217,9 @@
     "_comments_": [
       "=== Project3 Ad Generator — IP-Adapter Plus Pipeline (Product Image → SDXL) ===",
       "Model      : DreamShaper XL (dreamshaper_xl.safetensors)",
-      "IP-Adapter : ip-adapter-plus_sdxl_vit-h.bin  (weight=0.5, V only scaling)",
+      "IP-Adapter : ip-adapter-plus_sdxl_vit-h.bin  (weight=0.7, V only scaling)",
       "CLIP Vision: clip_vit_h.safetensors",
-      "Sampler    : euler_ancestral / karras / 30 steps / CFG 6.0",
+      "Sampler    : euler_ancestral / karras / 24 steps / CFG 7.5",
       "Size       : 1024 × 1024",
       "Node 11 (LoadImage) — product_image.png 자리에 업로드한 제품 이미지를 연결하세요.",
       "Positive prompt은 GPT-5-mini로 자동 생성 (pipeline_sdxl.py: build_sd_prompt)"
