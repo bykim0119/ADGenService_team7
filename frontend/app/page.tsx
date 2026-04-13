@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FolderOpen, MousePointerClick, TrendingUp, Megaphone, Loader2, ArrowRight, ChefHat } from "lucide-react";
+import { FolderOpen, MousePointerClick, TrendingUp, Megaphone, Loader2, ArrowRight, ChefHat, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +92,7 @@ export default function Dashboard() {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] gap-6 animate-in fade-in duration-700">
         <div className="w-20 h-20 bg-primary/5 rounded-[32px] border border-primary/10 flex items-center justify-center text-primary animate-pulse shadow-xl shadow-primary/5">
-           <ChefHat className="w-10 h-10" />
+          <ChefHat className="w-10 h-10" />
         </div>
         <div className="flex flex-col items-center gap-3">
           <p className="text-[13px] font-bold text-primary/60 tracking-widest uppercase">로딩 중...</p>
@@ -105,7 +105,7 @@ export default function Dashboard() {
   return (
     <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
       {/* ──────── Page Title ──────── */}
-      <div 
+      <div
         className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
         style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
       >
@@ -117,53 +117,54 @@ export default function Dashboard() {
 
       {/* Hero Slide Show: Horizontal Slide 리모델링 */}
       <Card className="group relative overflow-hidden rounded-[36px] border-0 bg-white p-0 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] transition-all duration-1000 h-[380px]">
-        
+
         {/* Sliding Container */}
-        <div 
+        <div
           className="absolute inset-0 flex transition-transform duration-[1000ms] ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {heroSlides.map((slide, idx) => (
-            <div 
+            <div
               key={idx}
               className="relative w-full h-full shrink-0 bg-cover bg-center"
               style={{ backgroundImage: `url("${slide.img}")` }}
             >
-               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
-               
-               {/* Slide Content (Inside each slide for better sync) */}
-               <div className="relative z-20 p-10 md:py-14 md:px-16 flex flex-col items-start justify-center h-full gap-6 max-w-4xl">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-[1px] bg-white/40" />
-                       <span className="text-[10px] font-black text-white/80 tracking-[0.5em] uppercase">
-                         {slide.subtitle}
-                       </span>
-                    </div>
-                    
-                    <h2 className="text-4xl md:text-[48px] font-bold text-white leading-[1.1] tracking-tight drop-shadow-xl">
-                       {slide.title.split(" ").map((word, i) => (
-                         i === 0 ? <span key={i} className="text-primary-foreground/90 font-serif italic font-light mr-3">{word}</span> : <span key={i}>{word} </span>
-                       ))}
-                    </h2>
-                    
-                    <p className="text-[14px] text-white/80 max-w-md leading-relaxed font-medium drop-shadow-lg whitespace-pre-wrap">
-                      {slide.desc}
-                    </p>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
+
+              {/* Slide Content (Inside each slide for better sync) */}
+              <div className="relative z-20 p-10 md:py-14 md:px-16 flex flex-col items-start justify-center h-full gap-6 max-w-4xl">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-[1px] bg-white/40" />
+                    <span className="text-[10px] font-black text-white/80 tracking-[0.5em] uppercase">
+                      {slide.subtitle}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center gap-6 mt-2">
-                    <Link href="/editor">
-                      <Button className="h-12 px-8 rounded-lg font-bold text-[14px] text-white bg-primary hover:bg-primary/95 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                           광고 생성하기
-                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                        <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
-                      </Button>
-                    </Link>
-                  </div>
-               </div>
+
+                  <h2 className="text-4xl md:text-[48px] font-bold text-white leading-[1.1] tracking-tight drop-shadow-xl">
+                    {slide.title.split(" ").map((word, i) => (
+                      i === 0 ? <span key={i} className="text-primary-foreground/90 font-serif italic font-light mr-3">{word}</span> : <span key={i}>{word} </span>
+                    ))}
+                  </h2>
+
+                  <p className="text-[14px] text-white/80 max-w-md leading-relaxed font-medium drop-shadow-lg whitespace-pre-wrap">
+                    {slide.desc}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6 mt-2">
+                  <Link href="/editor">
+                    <Button className="h-11 px-8 rounded-lg font-bold text-[13px] text-white bg-gradient-to-r from-primary to-[#4a7a6e] shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <Sparkles className="w-4 h-4 fill-white/20" />
+                        AI 광고 생성하기
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform ml-1" />
+                      </span>
+                      <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -171,8 +172,8 @@ export default function Dashboard() {
         {/* Slide Dots Indicator (Fixed Position) */}
         <div className="absolute bottom-8 right-12 z-30 flex gap-2.5">
           {heroSlides.map((_, i) => (
-            <button 
-              key={i} 
+            <button
+              key={i}
               onClick={() => setCurrentSlide(i)}
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-500",
@@ -198,7 +199,7 @@ export default function Dashboard() {
               <div className="w-11 h-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <item.icon className="w-5 h-5 text-primary" />
               </div>
-              
+
               <div className="flex flex-col min-w-0">
                 <p className="text-[10px] font-bold text-on-surface/40 uppercase tracking-widest leading-none mb-1">
                   {item.label}
@@ -211,7 +212,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            
+
             {/* Subtle glow on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </Card>
@@ -227,11 +228,11 @@ export default function Dashboard() {
         <div className="flex flex-col gap-3">
           {recentCampaigns.length === 0 ? (
             <div className="py-20 border border-dashed border-surface-container-highest/60 rounded-2xl flex flex-col items-center justify-center bg-surface-container-lowest">
-               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                 <Megaphone className="w-6 h-6 text-on-surface/10" />
-               </div>
-               <p className="text-on-surface/40 text-[14px] font-bold">아직 생성된 광고가 없습니다.</p>
-               <p className="text-on-surface/20 text-[12px] mt-2 font-medium">첫 번째 AI 디자인을 만들어보세요!</p>
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                <Megaphone className="w-6 h-6 text-on-surface/10" />
+              </div>
+              <p className="text-on-surface/40 text-[14px] font-bold">아직 생성된 광고가 없습니다.</p>
+              <p className="text-on-surface/20 text-[12px] mt-2 font-medium">첫 번째 AI 디자인을 만들어보세요!</p>
             </div>
           ) : recentCampaigns.map((campaign) => (
             <Link key={campaign.id} href={`/export?campaign_id=${campaign.id}`}>

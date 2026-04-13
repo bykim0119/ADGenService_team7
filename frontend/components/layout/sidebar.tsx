@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Utensils, Home, Megaphone, FolderOpen, Settings } from "lucide-react";
+import { Utensils, Home, Megaphone, FolderOpen, Settings, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -45,9 +45,9 @@ export function Sidebar() {
 
       <div className="mb-8 flex flex-col gap-2 px-1">
         <Link href="/editor" className="block">
-          <Button className="w-full h-11 rounded-lg font-bold text-[13px] text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
+          <Button className="w-full h-11 rounded-lg font-bold text-[13px] text-white bg-gradient-to-r from-primary to-[#4a7a6e] hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border-0 flex-shrink-0">
             <span className="relative z-10 flex items-center justify-center gap-2">
-              <Megaphone className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 fill-white/20" />
               AI 광고 생성
             </span>
             <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
@@ -63,8 +63,8 @@ export function Sidebar() {
               <div
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[13px] font-medium cursor-pointer group",
-                  isActive 
-                    ? "text-primary bg-primary/[0.04] font-semibold" 
+                  isActive
+                    ? "text-primary bg-primary/[0.04] font-semibold"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                 )}
               >
@@ -85,10 +85,10 @@ export function Sidebar() {
               <img alt="Profile" className="w-full h-full object-cover opacity-0" src="" />
             )}
           </div>
-              <div className="flex-1 mr-4 min-w-0">
-                <span className="text-[13px] font-semibold text-slate-700 truncate">{userData?.name || "로딩 중..."}</span>
-                <span className="text-[10px] text-primary/70 truncate mt-0.5 font-bold uppercase tracking-tight">{userData?.email || "사용자"}</span>
-              </div>
+          <div className="flex-1 mr-4 min-w-0">
+            <span className="text-[13px] font-semibold text-slate-700 truncate">{userData?.name || "로딩 중..."}</span>
+            <span className="text-[10px] text-primary/70 truncate mt-0.5 font-bold uppercase tracking-tight">{userData?.email || "사용자"}</span>
+          </div>
         </div>
       </div>
     </aside>
