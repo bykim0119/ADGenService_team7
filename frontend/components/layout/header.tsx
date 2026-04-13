@@ -97,10 +97,10 @@ export function Header() {
   if (pathname === '/settings') title = "설정";
 
   return (
-    <header className="w-full h-14 sticky top-0 z-10 flex justify-between items-center px-8 bg-white/70 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] shrink-0">
+    <header className="w-full h-14 sticky top-0 z-10 flex justify-between items-center px-8 bg-white/70 backdrop-blur-xl border-b border-surface-container-highest/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] shrink-0">
       <div className="flex items-center gap-4">
-        <h2 className="text-[14px] font-semibold text-slate-800 tracking-tight">
-          {isEditor ? "새로운 광고 생성" : title}
+        <h2 className="text-[14px] font-semibold text-on-surface tracking-tight">
+          {isEditor ? "AI 광고 생성" : title}
         </h2>
       </div>
 

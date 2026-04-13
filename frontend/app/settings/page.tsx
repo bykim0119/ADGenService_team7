@@ -101,35 +101,35 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] gap-6 animate-in fade-in duration-700">
-        <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary animate-pulse">
+        <div className="w-20 h-20 bg-primary/5 rounded-[32px] border border-primary/10 flex items-center justify-center text-primary animate-pulse shadow-xl shadow-primary/5">
            <ChefHat className="w-10 h-10" />
         </div>
         <div className="flex flex-col items-center gap-3">
           <p className="text-[13px] font-bold text-primary/60 tracking-widest uppercase">데이터 로딩 중...</p>
         </div>
-        <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm">AI가 설정 정보를 가져오는 중입니다...</p>
+        <p className="text-on-surface/40 text-[11px] font-bold tracking-tight bg-surface-container-lowest px-4 py-1.5 rounded-full border border-surface-container-highest/60 shadow-sm">AI가 설정 정보를 가져오는 중입니다...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 md:p-10 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-8">
+    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
       <div 
         className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
         style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
       >
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">설정</h1>
-        <p className="text-[13px] font-medium text-slate-500">계정 및 브랜드 아이덴티티를 최신으로 유지하세요.</p>
+        <h1 className="text-3xl font-bold text-on-surface tracking-tight">설정</h1>
+        <p className="text-[14px] font-medium text-on-surface/60">계정 및 브랜드 아이덴티티를 최신으로 유지하세요.</p>
       </div>
 
       <div className="max-w-4xl mx-auto w-full space-y-12">
         {/* Section: Profile Info */}
         <section className="space-y-6">
           <div className="flex items-center gap-3 mb-2 px-1">
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100">
-               <User className="w-4 h-4 text-slate-400" />
+            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center border border-surface-container-highest/40">
+               <User className="w-4 h-4 text-on-surface/40" />
             </div>
-            <h3 className="text-[11px] font-bold text-slate-400 tracking-[0.2em] uppercase">개인 프로필 정보</h3>
+            <h3 className="text-[11px] font-bold text-on-surface/40 tracking-[0.2em] uppercase">개인 프로필 정보</h3>
           </div>
           
           <Card className="p-0 border-slate-100 overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] rounded-2xl">
@@ -249,12 +249,12 @@ export default function SettingsPage() {
            </Button>
         </div>
 
-        <div className="p-5 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex items-center justify-between">
+        <div className="p-5 bg-surface-container-lowest rounded-2xl border border-dashed border-surface-container-highest/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <Shield className="w-4 h-4 text-slate-400" />
-             <p className="text-[11px] text-slate-400 leading-relaxed font-bold uppercase tracking-wider">계정 데이터 보호 정책</p>
+             <Shield className="w-4 h-4 text-on-surface/20" />
+             <p className="text-[11px] text-on-surface/40 leading-relaxed font-bold uppercase tracking-wider">계정 데이터 보호 정책</p>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">데이터 보호 정책 준수 중</p>
+          <p className="text-[11px] text-on-surface/20 font-medium">데이터 보호 정책 준수 중</p>
         </div>
       </div>
     </div>

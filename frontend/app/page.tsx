@@ -97,18 +97,22 @@ export default function Dashboard() {
         <div className="flex flex-col items-center gap-3">
           <p className="text-[13px] font-bold text-primary/60 tracking-widest uppercase">로딩 중...</p>
         </div>
-        <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm">AI가 회원님의 광고 정보를 가져오는 중입니다...</p>
+        <p className="text-on-surface/40 text-[11px] font-bold tracking-tight bg-surface-container-lowest px-4 py-1.5 rounded-full border border-surface-container-highest/60 shadow-sm">AI가 회원님의 광고 정보를 가져오는 중입니다...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8 md:p-12 mb-20 max-w-[1200px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      {/* ──────── Page Title ──────── */}
+      <div 
+        className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
+        style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
+      >
+        <h1 className="text-3xl font-bold text-on-surface tracking-tight flex items-center gap-3 !border-0">
           안녕하세요, {userName || "사용자"}님!
         </h1>
-        <p className="text-[14px] font-medium text-slate-500">오늘도 AI와 함께 완벽한 광고 이미지를 만들어 보세요.</p>
+        <p className="text-[14px] font-medium text-on-surface/60 !border-0">오늘도 AI 광고 생성과 함께 완벽한 광고를 만들어 보세요.</p>
       </div>
 
       {/* Hero Slide Show: Horizontal Slide 리모델링 */}
@@ -150,7 +154,7 @@ export default function Dashboard() {
                   
                   <div className="flex items-center gap-6 mt-2">
                     <Link href="/editor">
-                      <Button className="h-12 px-8 rounded-lg font-bold text-[14px] text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
+                      <Button className="h-12 px-8 rounded-lg font-bold text-[14px] text-white bg-primary hover:bg-primary/95 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
                         <span className="relative z-10 flex items-center justify-center gap-2">
                            광고 생성하기
                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -189,21 +193,21 @@ export default function Dashboard() {
           { label: "활성 광고", value: stats.activeCampaigns, icon: MousePointerClick },
           { label: "저장된 에셋", value: stats.savedAssets, icon: FolderOpen }
         ].map((item, idx) => (
-          <Card key={idx} className="group relative p-5 rounded-[24px] border border-slate-100 bg-white transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 cursor-default overflow-hidden">
+          <Card key={idx} className="group relative p-5 rounded-[24px] border border-surface-container-highest/60 bg-white transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 cursor-default overflow-hidden">
             <div className="flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <item.icon className="w-5 h-5 text-primary" />
               </div>
               
               <div className="flex flex-col min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                <p className="text-[10px] font-bold text-on-surface/40 uppercase tracking-widest leading-none mb-1">
                   {item.label}
                 </p>
                 <div className="flex items-baseline gap-1.5">
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                  <h3 className="text-2xl font-black text-on-surface tracking-tight leading-none">
                     {item.value}
                   </h3>
-                  <span className="text-[12px] font-bold text-slate-300">개</span>
+                  <span className="text-[12px] font-bold text-on-surface/20">개</span>
                 </div>
               </div>
             </div>
@@ -216,38 +220,38 @@ export default function Dashboard() {
 
       {/* Recent Campaigns */}
       <div className="flex flex-col gap-5">
-        <div className="flex items-center gap-2 text-slate-800 ml-1">
-          <FolderOpen className="w-5 h-5 text-slate-400" />
+        <div className="flex items-center gap-2 text-on-surface/60 ml-1">
+          <FolderOpen className="w-5 h-5 text-on-surface/30" />
           <h3 className="text-lg font-bold">최근 작업한 디자인</h3>
         </div>
         <div className="flex flex-col gap-3">
           {recentCampaigns.length === 0 ? (
-            <div className="py-20 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center bg-slate-50/50">
+            <div className="py-20 border border-dashed border-surface-container-highest/60 rounded-2xl flex flex-col items-center justify-center bg-surface-container-lowest">
                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                 <Megaphone className="w-6 h-6 text-slate-200" />
+                 <Megaphone className="w-6 h-6 text-on-surface/10" />
                </div>
-               <p className="text-slate-400 text-[14px] font-bold">아직 생성된 광고가 없습니다.</p>
-               <p className="text-slate-300 text-[12px] mt-2 font-medium">첫 번째 AI 디자인을 만들어보세요!</p>
+               <p className="text-on-surface/40 text-[14px] font-bold">아직 생성된 광고가 없습니다.</p>
+               <p className="text-on-surface/20 text-[12px] mt-2 font-medium">첫 번째 AI 디자인을 만들어보세요!</p>
             </div>
           ) : recentCampaigns.map((campaign) => (
             <Link key={campaign.id} href={`/export?campaign_id=${campaign.id}`}>
-              <Card className="p-5 rounded-xl border border-slate-100 bg-white shadow-sm hover:border-primary/20 hover:bg-primary/[0.01] hover:shadow-md transition-all cursor-pointer flex items-center justify-between group overflow-hidden relative">
+              <Card className="p-5 rounded-xl border border-surface-container-highest/60 bg-white shadow-sm hover:border-primary/20 hover:bg-primary/[0.01] hover:shadow-md transition-all cursor-pointer flex items-center justify-between group overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-primary transition-colors" />
                 <div className="flex items-center gap-5 relative z-10">
-                  <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:bg-primary/5 group-hover:border-primary/10 transition-all overflow-hidden bg-cover bg-center" style={{ backgroundImage: campaign.image ? `url(${campaign.image})` : 'none' }}>
+                  <div className="w-14 h-14 rounded-xl bg-surface-container border border-surface-container-highest/40 flex items-center justify-center text-on-surface/10 group-hover:text-primary group-hover:bg-primary/5 group-hover:border-primary/10 transition-all overflow-hidden bg-cover bg-center" style={{ backgroundImage: campaign.image ? `url(${campaign.image})` : 'none' }}>
                     {!campaign.image && <Megaphone className="w-4 h-4 opacity-20" />}
                   </div>
                   <div>
-                    <h4 className="font-bold text-[15px] text-slate-800 group-hover:text-primary transition-colors">{campaign.name}</h4>
+                    <h4 className="font-bold text-[15px] text-on-surface group-hover:text-primary transition-colors">{campaign.name}</h4>
                     <div className="flex items-center gap-3 mt-1">
-                      <p className="text-[11px] text-slate-400 font-bold">{campaign.date}</p>
-                      <div className="w-1 h-1 rounded-full bg-slate-200" />
-                      <span className="text-[11px] text-slate-400 font-medium">최근에 수정됨</span>
+                      <p className="text-[11px] text-on-surface/30 font-bold">{campaign.date}</p>
+                      <div className="w-1 h-1 rounded-full bg-on-surface/10" />
+                      <span className="text-[11px] text-on-surface/30 font-medium">최근에 수정됨</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-5">
-                  <Button variant="ghost" size="icon" className="group-hover:bg-primary/5 rounded-full text-slate-300 group-hover:text-primary w-10 h-10 transition-all">
+                  <Button variant="ghost" size="icon" className="group-hover:bg-primary/5 rounded-full text-on-surface/20 group-hover:text-primary w-10 h-10 transition-all">
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>

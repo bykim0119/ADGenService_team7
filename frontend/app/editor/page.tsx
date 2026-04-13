@@ -13,6 +13,8 @@ import {
   Copy,
   Plus,
   Minus,
+  Megaphone,
+  ChefHat,
 } from "lucide-react";
 import { Canvas, Textbox, FabricImage, Shadow, filters } from "fabric";
 import { useForm } from "react-hook-form";
@@ -25,10 +27,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const ASPECT_RATIOS = [
-  { id: '1:1', name: '1:1 (인스타 피드)', ratio: 1 / 1, class: 'aspect-square' },
-  { id: '9:16', name: '9:16 (스토리/릴스)', ratio: 9 / 16, class: 'aspect-[9/16]' },
-  { id: '16:9', name: '16:9 (와이드 광고)', ratio: 16 / 9, class: 'aspect-video' },
-  { id: '21:9', name: '21:9 (시네마틱)', ratio: 21 / 9, class: 'aspect-[21/9]' }
+  { id: '1:1', name: '인스타 피드', ratio: 1 / 1, class: 'aspect-square' },
+  { id: '9:16', name: '인스타 스토리', ratio: 9 / 16, class: 'aspect-[9/16]' },
+  { id: '16:9', name: '유튜브 썸네일', ratio: 16 / 9, class: 'aspect-video' },
+  { id: '21:9', name: '배너 광고', ratio: 21 / 9, class: 'aspect-[21/9]' }
 ];
 
 const INITIAL_PREVIEW_IMG = "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&q=80&w=1080&h=1080";
@@ -62,6 +64,77 @@ const LUXURY_PALETTE = [
   { name: '소프트 베이지', color: '#D6D3D1' }
 ];
 
+/* ──────────────────────────── Section Heading Component ──────────────────────────── */
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-[10px] font-bold tracking-[0.05em] uppercase text-on-surface/50 mb-3">
+      {children}
+    </h2>
+  );
+}
+
+/* ──────────────────────────── Label Component ──────────────────────────── */
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="text-[12px] font-bold text-on-surface/80 tracking-tight block mb-1.5">
+      {children}
+    </label>
+  );
+}
+
+/* ──────────────────────────── Unified Button Component ──────────────────────────── */
+function UnifiedButton({ 
+  children, 
+  onClick, 
+  disabled, 
+  variant = "primary", 
+  className,
+  icon: Icon
+}: { 
+  children: React.ReactNode; 
+  onClick?: () => void; 
+  disabled?: boolean; 
+  variant?: "primary" | "outline";
+  className?: string;
+  icon?: any;
+}) {
+  if (variant === "outline") {
+    return (
+      <Button
+        onClick={onClick}
+        disabled={disabled}
+        variant="outline"
+        className={cn(
+          "w-full h-11 rounded-lg border-surface-container-highest/70 text-on-surface/80 font-bold text-[13px] hover:bg-surface-container-high transition-all active:scale-[0.98] shadow-sm",
+          className
+        )}
+      >
+        <span className="flex items-center gap-2">
+          {Icon && <Icon className={cn("w-4 h-4", Icon === Loader2 && "animate-spin")} />}
+          {children}
+        </span>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "w-full h-11 rounded-lg font-bold text-[13px] text-white bg-primary hover:bg-primary/95 shadow-md shadow-primary/10 active:scale-[0.98] transition-all overflow-hidden relative group border-0",
+        className
+      )}
+    >
+      <span className="relative z-10 flex items-center justify-center gap-2">
+        {Icon && <Icon className={cn("w-4 h-4", Icon === Loader2 && "animate-spin")} />}
+        {children}
+      </span>
+      <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
+    </Button>
+  );
+}
+
 export default function EditorPage() {
   const router = useRouter();
   const { } = useForm({ defaultValues: { menuName: "" } });
@@ -75,6 +148,7 @@ export default function EditorPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [recommendedTags, setRecommendedTags] = useState<string[]>([]);
+  const [isRefreshingTags, setIsRefreshingTags] = useState(false);
   const [activeRatioIdx, setActiveRatioIdx] = useState(0);
   const [restaurantName, setRestaurantName] = useState("");
 
@@ -110,19 +184,22 @@ export default function EditorPage() {
       const currentIdx = activeRatioIdxRef.current;
       const current = prev[currentIdx] || {};
       const updates: any = {};
-      if (phraseObj) updates.text = phraseObj.text;
-      if (brandObj) updates.brand = brandObj.text;
-      if (hashObj) updates.hashtags = hashObj.text;
-      if (brandObj) updates.fontSize = brandObj.fontSize;
+      
+      if (phraseObj) {
+        updates.text = phraseObj.text;
+        updates.phrasePos = { top: phraseObj.top, left: phraseObj.left };
+      }
+      if (brandObj) {
+        updates.brand = brandObj.text;
+        updates.fontSize = brandObj.fontSize;
+        updates.brandPos = { top: brandObj.top, left: brandObj.left };
+      }
+      if (hashObj) {
+        updates.hashtags = hashObj.text;
+        updates.hashPos = { top: hashObj.top, left: hashObj.left };
+      }
 
-      if (
-        current.text === updates.text &&
-        current.brand === updates.brand &&
-        current.hashtags === updates.hashtags &&
-        current.fontSize === updates.fontSize
-      ) return prev;
-
-      return { ...prev, [currentIdx]: { ...(prev[currentIdx] || {}), ...updates, textAlign: 'center', isManualEdit: true } };
+      return { ...prev, [currentIdx]: { ...current, ...updates, isManualEdit: true } };
     });
   };
 
@@ -132,6 +209,7 @@ export default function EditorPage() {
   };
 
   const handleRefreshTags = async () => {
+    setIsRefreshingTags(true);
     try {
       const res = await fetch("/api/tags", {
         method: "POST",
@@ -145,9 +223,13 @@ export default function EditorPage() {
           return;
         }
       }
-    } catch {}
-    const shuffled = [...TAG_POOL].sort(() => 0.5 - Math.random());
-    setRecommendedTags(shuffled.slice(0, 6));
+    } catch (e) {
+      console.error("Refresh Tags Error:", e);
+    } finally {
+      const shuffled = [...TAG_POOL].sort(() => 0.5 - Math.random());
+      setRecommendedTags(shuffled.slice(0, 6));
+      setTimeout(() => setIsRefreshingTags(false), 500);
+    }
   };
 
   const updateCanvasBackground = async (overrideData?: any) => {
@@ -223,15 +305,21 @@ export default function EditorPage() {
     const phraseTop = brandTop - (baseFontSize * 1.5);
 
     const textLayers: any[] = [];
-    if (currentData.text) textLayers.push(new Textbox(currentData.text.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'phrase' }, top: phraseTop, fontSize: baseFontSize * 0.5, width: 440, textAlign: 'center' }));
-    if (currentData.brand) textLayers.push(new Textbox(currentData.brand.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'brand' }, top: brandTop, fontSize: baseFontSize, fontWeight: 'bold', strokeWidth: 6, width: 440, textAlign: 'center' }));
-    if (currentData.hashtags) textLayers.push(new Textbox(currentData.hashtags.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'hash' }, top: hashTop, fontSize: baseFontSize * 0.45, width: 440, textAlign: 'center' }));
+    if (currentData.text) {
+      const pos = currentData.phrasePos || { top: phraseTop, left: 230 };
+      textLayers.push(new Textbox(currentData.text.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'phrase' }, top: pos.top, left: pos.left, fontSize: baseFontSize * 0.5, width: 440, textAlign: 'center' }));
+    }
+    if (currentData.brand) {
+      const pos = currentData.brandPos || { top: brandTop, left: 230 };
+      textLayers.push(new Textbox(currentData.brand.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'brand' }, top: pos.top, left: pos.left, fontSize: baseFontSize, fontWeight: 'bold', strokeWidth: 6, width: 440, textAlign: 'center' }));
+    }
+    if (currentData.hashtags) {
+      const pos = currentData.hashPos || { top: hashTop, left: 230 };
+      textLayers.push(new Textbox(currentData.hashtags.trim(), { ...commonStyles, ...modernControlProps, data: { ...modernControlProps.data, id: 'hash' }, top: pos.top, left: pos.left, fontSize: baseFontSize * 0.45, width: 440, textAlign: 'center' }));
+    }
 
     textLayers.forEach(obj => {
       canvas.add(obj);
-      obj.set({ textAlign: 'center', originX: 'center', left: 230 });
-      if (obj instanceof Textbox) obj.set({ width: 440 });
-      (canvas as any).centerObjectH(obj);
       obj.setCoords();
     });
 
@@ -239,9 +327,6 @@ export default function EditorPage() {
     setTimeout(() => {
       canvas.getObjects().forEach(obj => {
         if ((obj as any).data?.isTextLayer) {
-          obj.set({ textAlign: 'center', originX: 'center', left: 230 });
-          if (obj instanceof Textbox) obj.set({ width: 440 });
-          (canvas as any).centerObjectH(obj);
           obj.setCoords();
         }
       });
@@ -254,10 +339,31 @@ export default function EditorPage() {
     const hashtagRegex = /#[^\s#]+/g;
     const hashes = (combinedText.match(hashtagRegex) || []).join(' ');
     const mainTextOnly = combinedText.replace(hashtagRegex, '').replace(/[\[\]【】]/g, '').trim();
-    setPlatformTexts(prev => ({
-      ...prev,
-      [activeRatioIdx]: { ...(prev[activeRatioIdx] || {}), text: mainTextOnly, brand: restaurantName, hashtags: hashes, isManualEdit: true }
-    }));
+
+    // 텍스트 길이에 따른 유동적인 폰트 사이즈 계산 (잘림 방지 및 미학적 최적화)
+    let optimizedFontSize = 44;
+    const textLength = mainTextOnly.length;
+    if (textLength > 15) optimizedFontSize = 38;
+    if (textLength > 25) optimizedFontSize = 32;
+    if (textLength > 40) optimizedFontSize = 26;
+    if (textLength > 60) optimizedFontSize = 20;
+
+    setPlatformTexts(prev => {
+      const next = { ...prev };
+      ASPECT_RATIOS.forEach((_, idx) => {
+        // 각 사이즈별로 텍스트와 최적화된 폰트 사이즈 적용
+        next[idx] = { 
+          ...(next[idx] || {}), 
+          text: mainTextOnly, 
+          brand: restaurantName, 
+          hashtags: hashes, 
+          fontSize: optimizedFontSize, 
+          isManualEdit: true 
+        };
+      });
+      return next;
+    });
+    toast.success("4종 모든 사이즈에 문구가 최적으로 적용되었습니다.");
   };
 
   const updateSelectedTextStyle = (props: any, relative = false) => {
@@ -451,18 +557,28 @@ export default function EditorPage() {
   if (isLoadingUser) return null;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center py-10 px-6 font-sans text-slate-900 animate-in fade-in duration-700 relative overflow-hidden">
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[60%] bg-primary/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[50%] bg-blue-50/30 rounded-full blur-[140px] pointer-events-none" />
-
-      <div className="w-full max-w-[1700px] flex flex-col gap-4 mb-10 px-4 animate-in fade-in slide-in-from-top-8 duration-1000 ease-out relative z-10">
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">AI 이미지 생성</h1>
+    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      {/* ──────── Page Title ──────── */}
+      <div 
+        className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
+        style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
+      >
+        <h1 className="text-3xl font-bold text-on-surface tracking-tight font-headline !border-0">AI 광고 생성</h1>
+        <p className="text-[14px] font-medium text-on-surface/60 leading-relaxed !border-0">
+          제품 사진을 업로드하고, AI 광고 디자인이 완성하는 고품질 광고 이미지를 만들어보세요.
+        </p>
       </div>
 
-      <div className="w-full max-w-[1700px] grid grid-cols-12 gap-8 px-4 pb-12">
-        {/* 좌측 설정 패널 */}
-        <aside className="col-span-12 xl:col-span-3 flex flex-col gap-6">
-          <Card onClick={() => fileInputRef.current?.click()} className="p-6 border-slate-100 shadow-sm rounded-2xl bg-white border-dashed border-2 hover:border-primary/30 transition-all relative overflow-hidden group cursor-pointer active:scale-[0.98]">
+      {/* ──────── 3-Column Grid ──────── */}
+      <div className="w-full max-w-[1600px] grid grid-cols-12 gap-8 px-2 pb-16 items-start">
+
+        {/* ════════════════════════ LEFT PANEL ════════════════════════ */}
+        <aside className="col-span-12 xl:col-span-3 flex flex-col gap-10">
+          {/* 이미지 업로드 */}
+          <Card
+            onClick={() => fileInputRef.current?.click()}
+            className="p-6 rounded-xl bg-white border border-surface-container-highest/60 border-dashed hover:border-primary transition-all duration-300 cursor-pointer active:scale-[0.98] shadow-sm hover:shadow-md group"
+          >
             <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
@@ -473,207 +589,368 @@ export default function EditorPage() {
                 r.readAsDataURL(file);
               }
             }} />
-            <div className="flex flex-col items-center justify-center py-5 gap-2 pointer-events-none">
-              <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center text-primary/40 group-hover:text-primary duration-500 shadow-inner"><UploadCloud className="w-6 h-6" /></div>
-              <p className="text-[14px] text-slate-700 font-bold">제품 이미지 올리기 (선택)</p>
+            <div className="flex flex-col items-center justify-center py-4 gap-3">
+              <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center text-on-surface/40 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                <UploadCloud className="w-7 h-7" />
+              </div>
+              <div className="text-center">
+                <p className="text-[14px] font-bold text-on-surface">제품 이미지 업로드 (선택)</p>
+                <p className="text-[11px] font-medium text-on-surface/50 mt-1">추천: JPG, PNG (최대 10MB)</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6 rounded-2xl border-none shadow-sm bg-white/70 backdrop-blur-sm">
-            <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4 text-primary/60">광고 정보</h2>
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em] ml-1">업종</label>
+          {/* 광고 정보 */}
+          <Card className="p-6 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm">
+            <SectionHeading>광고 기본 정보</SectionHeading>
+            <div className="flex flex-col gap-8 mt-1">
+              {/* 업종 */}
+              <div className="space-y-2.5">
+                <FieldLabel>업종 카테고리</FieldLabel>
                 <div className="grid grid-cols-2 gap-2">
-                  {CATEGORIES.map((c) => (
-                    <button key={c.id} onClick={() => setCategoryKey(c.id)} className={cn("py-2 px-3 rounded-lg text-[11px] font-bold border transition-all", categoryKey === c.id ? "bg-primary text-white border-primary" : "bg-slate-50 text-slate-500 border-slate-100 hover:border-primary/30")}>
+                  {CATEGORIES.map((c, idx) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setCategoryKey(c.id)}
+                      className={cn(
+                        "py-2.5 px-3 rounded-lg text-[11px] font-bold border transition-all duration-200 whitespace-nowrap",
+                        idx === 4 && "col-span-2",
+                        categoryKey === c.id
+                          ? "bg-primary/5 border-primary text-primary shadow-sm"
+                          : "bg-surface-container-lowest border-surface-container-highest/60 text-on-surface/60 hover:bg-primary/5 hover:border-primary/30"
+                      )}
+                    >
                       {c.label}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em] ml-1">테마</label>
-                <div className="flex gap-2">
+
+              {/* 테마 */}
+              <div className="space-y-2.5">
+                <FieldLabel>디자인 테마</FieldLabel>
+                <div className="grid grid-cols-3 gap-2">
                   {THEMES.map((t) => (
-                    <button key={t.id} onClick={() => setThemeKey(t.id)} className={cn("flex-1 py-2 rounded-lg text-[11px] font-bold border transition-all", themeKey === t.id ? "bg-primary text-white border-primary" : "bg-slate-50 text-slate-500 border-slate-100 hover:border-primary/30")}>
+                    <button
+                      key={t.id}
+                      onClick={() => setThemeKey(t.id)}
+                      className={cn(
+                        "py-2 rounded-lg text-[11px] font-bold border transition-all duration-200 whitespace-nowrap",
+                        themeKey === t.id
+                          ? "bg-primary/5 border-primary text-primary shadow-sm"
+                          : "bg-surface-container-lowest border-surface-container-highest/60 text-on-surface/60 hover:bg-primary/5 hover:border-primary/30"
+                      )}
+                    >
                       {t.label}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em] ml-1">광고 설명</label>
-                <Textarea value={adUserInput} onChange={(e) => setAdUserInput(e.target.value)} placeholder="예: 여름 시즌 신제품, 청량하고 시원한 느낌" className="bg-white border-slate-200 min-h-[90px] rounded-lg text-[13px] font-medium" />
+
+              {/* 광고 설명 */}
+              <div className="space-y-2">
+                <FieldLabel>상세 광고 컨셉</FieldLabel>
+                <Textarea
+                  value={adUserInput}
+                  onChange={(e) => setAdUserInput(e.target.value)}
+                  placeholder="추천: 여름 시즌 신제품, 시원한 바다 배경"
+                  className="bg-surface-container-lowest border-surface-container-highest/60 min-h-[100px] rounded-lg text-[13px] leading-relaxed placeholder:text-on-surface/30 focus:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 transition-all px-4 py-3"
+                />
+                <p className="text-[11px] font-medium text-on-surface/40 mt-1.5 px-0.5">
+                  AI가 입력을 분석하여 컨셉에 맞는 배경을 자동 생성합니다.
+                </p>
               </div>
             </div>
-          </Card>
-
-          <Card className="p-6 rounded-2xl border-none shadow-sm bg-white/70 backdrop-blur-sm">
-            <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4 text-primary/60">생성</h2>
-            <p className="text-[11px] text-slate-400 mb-4">제품 이미지를 업로드하면 IP-Adapter로 스타일이 반영됩니다.</p>
-            {hasProductImage && (
-              <div className="mb-4 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-primary/40 uppercase tracking-[0.2em]">이미지 반영 강도</label>
-                  <span className="text-[11px] font-bold text-primary">{ipAdapterWeight.toFixed(1)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="1.0"
-                  step="0.1"
-                  value={ipAdapterWeight}
-                  onChange={(e) => setIpAdapterWeight(parseFloat(e.target.value))}
-                  className="w-full h-1.5 accent-primary cursor-pointer"
-                />
-                <div className="flex justify-between text-[9px] text-slate-300 font-bold mt-0.5">
-                  <span>프롬프트 위주</span>
-                  <span>이미지 위주</span>
-                </div>
-              </div>
-            )}
-            <Button onClick={handleGenerateCopy} disabled={isGeneratingCopy} className="w-full h-11 mb-3 rounded-lg bg-slate-900 text-white font-bold text-[13px] shadow-lg shadow-black/10 hover:bg-slate-800 active:scale-[0.98] transition-all overflow-hidden relative group">
-              <span className="relative z-10 flex items-center justify-center gap-2">{isGeneratingCopy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} 광고 문구 생성</span>
-            </Button>
-            <Button onClick={handleGenerateAd} disabled={isCooking} className="w-full h-11 rounded-lg bg-primary text-white font-bold text-[13px] shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] transition-all overflow-hidden relative group border-0">
-              <span className="relative z-10 flex items-center justify-center gap-2">{isCooking ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />} 광고 이미지 생성</span>
-            </Button>
           </Card>
         </aside>
 
-        {/* 중앙 캔버스 */}
-        <main className="col-span-12 xl:col-span-6 flex flex-col gap-8">
+        {/* ════════════════════════ CENTER – CANVAS ════════════════════════ */}
+        <main className="col-span-12 xl:col-span-6 flex flex-col gap-6">
+          {/* Preview Header */}
           <div className="flex flex-col gap-6 w-full">
-            <div className="flex items-center justify-between px-3">
-              <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">실시간 미리보기</h3>
-              <div className="bg-white p-1 rounded-full shadow-sm flex gap-1 border border-slate-100">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-2 px-1">
+              <div>
+                <h3 className="text-[11px] font-bold text-on-surface/50 uppercase tracking-wider">디자인 미리보기</h3>
+              </div>
+              <div className="bg-white p-1 rounded-lg flex gap-1 border border-surface-container-highest/60 shadow-sm min-w-max">
                 {ASPECT_RATIOS.map((r, i) => (
-                  <button key={r.id} onClick={() => handleRatioChange(i)} className={cn("px-4 py-1.5 text-[11px] font-bold rounded-full transition-all", activeRatioIdx === i ? "bg-slate-100 text-primary border border-slate-200/50 scale-105 shadow-sm" : "text-slate-400 hover:bg-slate-50")}>{r.id}</button>
+                  <button
+                    key={r.id}
+                    onClick={() => handleRatioChange(i)}
+                    className={cn(
+                      "px-4 py-2 text-[11px] font-bold rounded-lg transition-all duration-300 whitespace-nowrap border border-transparent",
+                      activeRatioIdx === i
+                        ? "bg-primary/5 border-primary text-primary shadow-sm"
+                        : "text-on-surface/50 hover:bg-primary/5 hover:text-primary hover:border-primary/30"
+                    )}
+                  >
+                    {r.name}
+                  </button>
                 ))}
               </div>
             </div>
+
+            {/* Canvas Frame */}
             <div className="flex justify-center w-full">
-              <div className={cn("bg-white rounded-[40px] shadow-2xl overflow-hidden border-8 border-white relative transition-all duration-300", ASPECT_RATIOS[activeRatioIdx].class)} style={{ width: '100%', maxWidth: '460px' }}>
-                <div className="w-full h-full flex items-center justify-center overflow-hidden bg-slate-50"><canvas ref={fabricCanvasElRef} /></div>
+              <div
+                className={cn(
+                  "bg-white rounded-[24px] shadow-2xl overflow-hidden border border-surface-container-highest/60 relative transition-all duration-500",
+                  ASPECT_RATIOS[activeRatioIdx].class
+                )}
+                style={{ width: '100%', maxWidth: '460px' }}
+              >
+                <div className="w-full h-full flex items-center justify-center overflow-hidden bg-surface-container-low">
+                  <canvas ref={fabricCanvasElRef} />
+                </div>
                 {isCooking && (
-                  <div className="absolute inset-0 z-[100] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-500 p-10 text-center gap-5 rounded-[32px]">
-                    <div className="w-20 h-20 bg-primary/5 rounded-[32px] flex items-center justify-center text-primary shadow-inner border border-primary/5">
-                      <ImageIcon className="w-10 h-10" />
+                  <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-6 p-10 text-center animate-in fade-in duration-500">
+                    <div className="w-20 h-20 bg-primary/5 rounded-[32px] border border-primary/10 flex items-center justify-center text-primary animate-pulse shadow-xl shadow-primary/5">
+                      <ChefHat className="w-10 h-10" />
                     </div>
-                    <div className="flex flex-col items-center gap-2 w-full max-w-[200px]">
-                      <div className="flex justify-between w-full">
-                        <p className="text-[11px] font-bold text-primary/60 tracking-widest uppercase">
+                    <div className="space-y-2">
+                      <p className="text-[17px] font-bold text-on-surface tracking-tight">AI 광고 생성 중</p>
+                      <p className="text-[13px] font-medium text-on-surface/50 max-w-[240px] leading-relaxed mx-auto">
+                        브랜드 컨셉과 어울리는 배경 소품을 배치하고 있습니다.
+                      </p>
+                    </div>
+                    <div className="w-full max-w-[200px] flex flex-col gap-2">
+                      <div className="flex justify-between items-center">
+                        <p className="text-[11px] font-bold text-on-surface/50 uppercase tracking-widest">
                           {genProgress < 5 ? "준비 중" : genProgress < 15 ? "모델 로딩" : genProgress < 91 ? "이미지 생성" : "후처리 중"}
                         </p>
                         <p className="text-[11px] font-bold text-primary">{genProgress}%</p>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-surface-container-low rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary rounded-full transition-all duration-500"
                           style={{ width: `${genProgress}%` }}
                         />
                       </div>
                     </div>
-                    <p className="text-slate-400 text-[11px] font-bold tracking-tight bg-slate-50 px-4 py-2 rounded-full border border-slate-100 shadow-sm">
-                      {genProgress < 15 ? "모델과 설정을 불러오는 중입니다" : genProgress < 91 ? `샘플링 진행 중... (${genProgress}%)` : "이미지를 마무리하는 중입니다"}
-                    </p>
+                    <div className="bg-surface-container-lowest px-6 py-2.5 rounded-full border border-surface-container-highest/70 shadow-sm flex items-center justify-center">
+                      <span className="text-[12px] font-bold text-primary tracking-wide">
+                        {genProgress < 15 ? "모델과 설정을 불러오는 중..." : genProgress < 91 ? `샘플링 진행 중 (${genProgress}%)` : "이미지를 마무리하는 중..."}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <Card className="p-7 rounded-[32px] border-none shadow-sm bg-white flex flex-col gap-8 font-bold relative overflow-hidden">
-            <div className="flex flex-col gap-5 z-10">
-              <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary/60 leading-none">글자 스타일</h2>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 h-11">
-                  <Button variant="ghost" size="icon" className="w-11 h-11 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 hover:text-primary active:scale-[0.85] transition-all" onClick={() => updateSelectedTextStyle({ fontSize: -2 }, true)}><Minus className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" className="w-11 h-11 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 hover:text-primary active:scale-[0.85] transition-all" onClick={() => updateSelectedTextStyle({ fontSize: 2 }, true)}><Plus className="w-4 h-4" /></Button>
-                </div>
-                <div className="relative flex-1 max-w-[280px]">
-                  <select value={platformTexts[activeRatioIdx]?.fontFamily || "Jua"} className="appearance-none bg-slate-50 border border-slate-100 h-11 text-[13px] font-bold px-5 pr-12 rounded-2xl outline-none w-full cursor-pointer" onChange={(e) => updateSelectedTextStyle({ fontFamily: e.target.value })}>
-                    <option value="Jua">주아체 (Trend)</option>
-                    <option value="Black Han Sans">블랙 한산스</option>
-                    <option value="Hahmlet">함렛 (Elite)</option>
-                    <option value="Do Hyeon">도현체</option>
-                    <option value="Nanum Myeongjo">나눔명조</option>
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
+          {/* ──── Text Style Controls ──── */}
+          <Card className="p-6 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm mt-2">
+            <SectionHeading>텍스트 스타일링</SectionHeading>
+
+            {/* Size + Font */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-10 h-10 rounded-lg border-surface-container-highest/70 text-on-surface/60 hover:text-primary active:scale-[0.9] transition-all"
+                  onClick={() => updateSelectedTextStyle({ fontSize: -2 }, true)}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-10 h-10 rounded-lg border-surface-container-highest/70 text-on-surface/60 hover:text-primary active:scale-[0.9] transition-all"
+                  onClick={() => updateSelectedTextStyle({ fontSize: 2 }, true)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="relative flex-1">
+                <select
+                  value={platformTexts[activeRatioIdx]?.fontFamily || "Jua"}
+                  className="appearance-none bg-surface-container-lowest border border-surface-container-highest/70 h-10 text-[13px] font-bold px-4 pr-10 rounded-lg outline-none w-full cursor-pointer text-on-surface group-hover:border-primary transition-all shadow-sm"
+                  onChange={(e) => updateSelectedTextStyle({ fontFamily: e.target.value })}
+                >
+                  <option value="Jua">주아체</option>
+                  <option value="Black Han Sans">블랙 한산스</option>
+                  <option value="Hahmlet">함렛</option>
+                  <option value="Do Hyeon">도현체</option>
+                  <option value="Nanum Myeongjo">나눔명조</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface/30 pointer-events-none" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-10 z-10">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-1"><div className="w-1 h-3 bg-primary/20 rounded-full" /><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">메인 색상</span></div>
-                <div className="flex flex-wrap gap-2.5">{LUXURY_PALETTE.map(p => (<button key={p.color} onClick={() => updateSelectedTextStyle({ fill: p.color })} className={cn("w-8 h-8 rounded-full border shadow-sm hover:scale-110 active:scale-95 transition-all", p.color === '#FFFFFF' ? "border-slate-200" : "border-slate-50/10")} style={{ backgroundColor: p.color }} title={p.name} />))}</div>
+
+            {/* Color Palettes */}
+            <div className="grid grid-cols-2 gap-10">
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-3 bg-primary rounded-full" />
+                  <span className="text-[11px] font-bold text-on-surface/60 uppercase">글자 색상</span>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {LUXURY_PALETTE.map(p => (
+                    <button
+                      key={p.color}
+                      onClick={() => updateSelectedTextStyle({ fill: p.color })}
+                      className={cn(
+                        "w-7 h-7 rounded-full border hover:scale-110 active:scale-90 transition-all shadow-sm",
+                        p.color === '#FFFFFF' ? "border-surface-container-highest/70" : "border-white"
+                      )}
+                      style={{ backgroundColor: p.color }}
+                      title={p.name}
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-1"><div className="w-1 h-3 bg-primary/20 rounded-full" /><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">테두리 색상</span></div>
-                <div className="flex flex-wrap gap-2.5">{LUXURY_PALETTE.map(p => (<button key={'s' + p.color} onClick={() => updateSelectedTextStyle({ stroke: p.color, strokeWidth: 8 })} className={cn("w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 active:scale-95 transition-all", p.color === '#FFFFFF' ? "border-slate-200" : "border-slate-50/10")} style={{ borderColor: p.color, backgroundColor: 'transparent' }} title={p.name} />))}</div>
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-3 bg-secondary rounded-full" />
+                  <span className="text-[11px] font-bold text-on-surface/60 uppercase">테두리 색상</span>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {LUXURY_PALETTE.map(p => (
+                    <button
+                      key={'s' + p.color}
+                      onClick={() => updateSelectedTextStyle({ stroke: p.color, strokeWidth: 8 })}
+                      className={cn(
+                        "w-7 h-7 rounded-full border hover:scale-110 active:scale-90 transition-all shadow-sm",
+                        p.color === '#FFFFFF' ? "border-surface-container-highest/70" : "border-white"
+                      )}
+                      style={{ borderColor: p.color, backgroundColor: 'transparent' }}
+                      title={p.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </Card>
         </main>
 
-        {/* 우측 카피 패널 */}
-        <aside className="col-span-12 xl:col-span-3">
-          <Card className="p-6 rounded-2xl border-none shadow-sm bg-white flex flex-col relative overflow-hidden font-bold">
-            <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4 text-primary/60 pt-1">AI 대화 히스토리</h2>
-
-            {adHistory.length > 0 && (
-              <div className="flex flex-col gap-3 mb-5 max-h-[200px] overflow-y-auto pr-1">
-                {adHistory.map((item, i) => (
-                  <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5">
-                    <span className="text-[9px] font-bold text-primary/50 uppercase tracking-widest">요청 {i + 1}</span>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">{item.user_input}</p>
-                    {item.message && (
-                      <div className="mt-1 pt-1.5 border-t border-slate-100/70">
-                        <p className="text-[10px] text-primary/60 font-normal leading-relaxed">{item.message}</p>
-                      </div>
-                    )}
+        {/* ════════════════════════ RIGHT PANEL ════════════════════════ */}
+        <aside className="col-span-12 xl:col-span-3 flex flex-col gap-10">
+          {/* 생성 도구 버튼 모음 */}
+          <Card className="p-7 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm">
+             <SectionHeading>디자인 생성 도구</SectionHeading>
+             <div className="flex flex-col gap-4 mt-1.5">
+                {hasProductImage && (
+                  <div className="space-y-1.5 pb-2 border-b border-surface-container-highest/40">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold text-on-surface/50 uppercase tracking-[0.15em]">이미지 반영 강도</label>
+                      <span className="text-[11px] font-bold text-primary">{ipAdapterWeight.toFixed(1)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="1.0"
+                      step="0.1"
+                      value={ipAdapterWeight}
+                      onChange={(e) => setIpAdapterWeight(parseFloat(e.target.value))}
+                      className="w-full h-1.5 accent-primary cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[9px] text-on-surface/30 font-bold mt-0.5">
+                      <span>프롬프트 위주</span>
+                      <span>이미지 위주</span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
+                )}
+                <UnifiedButton
+                  onClick={handleGenerateCopy}
+                  disabled={isGeneratingCopy}
+                  variant="outline"
+                  icon={isGeneratingCopy ? Loader2 : Sparkles}
+                  className={cn(isGeneratingCopy && "animate-pulse")}
+                >
+                  광고 카피 추천 받기
+                </UnifiedButton>
+                <UnifiedButton
+                  onClick={handleGenerateAd}
+                  disabled={isCooking}
+                  icon={isCooking ? Loader2 : Megaphone}
+                >
+                  AI 광고 디자인 생성
+                </UnifiedButton>
+             </div>
+             <p className="text-[11px] font-medium text-on-surface/50 mt-5 leading-relaxed px-0.5">
+               AI가 컨셉에 가장 어울리는 카피와 이미지를 제안합니다. 마음에 드는 카피를 선택하여 디자인에 적용해 보세요.
+             </p>
+          </Card>
 
-            <div className="flex flex-col gap-5 overflow-y-auto max-h-[600px] pr-1 z-10">
+          {/* 추천 카피 리스트 */}
+          <Card className="p-7 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm flex flex-col">
+            <SectionHeading>카피 추천 결과</SectionHeading>
+
+            <div className="flex flex-col gap-4 mt-1 overflow-y-auto max-h-[500px] pr-1 styled-scrollbar">
+              {aiCopies.length === 0 && !isGeneratingCopy && (
+                <div className="py-12 text-center bg-surface-container-lowest/50 rounded-lg border border-dashed border-surface-container-highest/60">
+                   <p className="text-[11px] font-medium text-on-surface/30">생성된 카피가 없습니다.</p>
+                </div>
+              )}
               {aiCopies.map((c, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50 hover:border-primary/10 transition-all flex flex-col gap-4">
+                <div key={i} className="p-4 rounded-lg bg-surface-container-lowest border border-surface-container-highest/50 hover:border-primary/30 transition-all duration-300 flex flex-col gap-4 group">
                   <Textarea
                     value={c}
                     onChange={(e) => { const n = [...aiCopies]; n[i] = e.target.value; setAiCopies(n); }}
-                    className="bg-transparent border-none p-0 focus-visible:ring-0 text-[12px] text-slate-600 leading-relaxed font-sans min-h-[80px] resize-none"
+                    className="bg-transparent border-none p-0 focus-visible:ring-0 text-[12px] font-bold text-on-surface/80 leading-relaxed min-h-[80px] resize-none"
                   />
-                  <div className="flex items-center gap-2 pt-1">
-                    <Button variant="outline" onClick={() => addTextToCanvas(c)} className="flex-1 h-10 rounded-lg border-slate-200 text-slate-600 text-[11px] font-bold hover:bg-slate-50 hover:text-primary active:scale-[0.98] transition-all">이미지에 적용</Button>
-                    <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(c); toast.success("카피 복사 완료."); }} className="w-10 h-10 rounded-lg border-slate-200 text-slate-400 hover:text-primary active:scale-[0.98] transition-all"><Copy className="w-4 h-4" /></Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => addTextToCanvas(c)}
+                      className="flex-1 h-8 rounded-lg border-surface-container-highest/70 text-on-surface/60 text-[10px] font-bold hover:bg-primary/5 hover:text-primary hover:border-primary/30 active:scale-[0.96] transition-all duration-200"
+                    >
+                      이미지에 적용
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => { navigator.clipboard.writeText(c); toast.success("카피가 복사되었습니다."); }}
+                      className="w-8 h-8 rounded-lg border-surface-container-highest/70 text-on-surface/50 hover:text-primary active:scale-[0.96] transition-all"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
+          </Card>
 
-            <div className="space-y-6 mt-6 pt-6 border-t border-slate-50 z-10">
-              <div className="flex items-center justify-between font-sans">
-                <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">추천 태그</h2>
-                <Button variant="ghost" size="icon" onClick={handleRefreshTags} className="w-8 h-8 text-slate-300 hover:text-primary"><RefreshCcw className="w-4 h-4" /></Button>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {recommendedTags.map(t => (
-                  <Badge key={t} variant="outline" onClick={() => {
+          {/* 추천 태그 + 저장 */}
+          <Card className="p-7 rounded-xl bg-white border border-surface-container-highest/60 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+               <h2 className="text-[10px] font-bold text-on-surface/50 uppercase tracking-[0.05em]">추천 해시태그</h2>
+               <Button 
+                 variant="ghost" 
+                 size="icon" 
+                 onClick={handleRefreshTags} 
+                 disabled={isRefreshingTags}
+                 className="w-8 h-8 text-on-surface/30 hover:text-primary hover:bg-primary/5 rounded-full transition-all"
+               >
+                 <RefreshCcw className={cn("w-3.5 h-3.5", isRefreshingTags && "animate-spin text-primary")} />
+               </Button>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-7 mt-1">
+              {recommendedTags.map(t => (
+                <Badge
+                  key={t}
+                  variant="outline"
+                  onClick={() => {
                     syncCanvasToState();
                     const cur = platformTexts[activeRatioIdx]?.hashtags || "";
                     const next = cur.includes(t) ? cur : (cur + " " + t).trim();
                     setPlatformTexts(prev => ({ ...prev, [activeRatioIdx]: { ...(prev[activeRatioIdx] || {}), hashtags: next, isManualEdit: true } }));
-                  }} className="text-[10px] py-1 border-slate-100 text-slate-400 font-bold hover:bg-slate-50 cursor-pointer">{t}</Badge>
-                ))}
-              </div>
-              <Button onClick={handleFinalExport} disabled={isExporting || !generatedImage} className="w-full h-11 mt-6 rounded-lg bg-primary text-white font-bold text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all relative overflow-hidden group">
-                <span className="relative z-10 flex items-center justify-center gap-2">{isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} 광고 저장하기</span>
-                <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
-              </Button>
+                  }}
+                  className="text-[10px] py-1 px-2.5 border-surface-container-highest/70 text-on-surface/60 font-bold hover:bg-primary/5 hover:text-primary hover:border-primary/30 cursor-pointer transition-all rounded-full"
+                >
+                  {t}
+                </Badge>
+              ))}
             </div>
+            <UnifiedButton
+              onClick={handleFinalExport}
+              disabled={isExporting || !generatedImage}
+              icon={isExporting ? Loader2 : Download}
+              className="shadow-primary/20"
+            >
+              에셋 라이브러리에 저장
+            </UnifiedButton>
           </Card>
         </aside>
       </div>
