@@ -1,4 +1,5 @@
 import base64
+from concurrent.futures import ThreadPoolExecutor
 from celery.utils.log import get_task_logger
 from celery_app import celery_app
 from pipeline_sdxl import build_sd_prompt, write_copy, generate_tags
@@ -24,12 +25,18 @@ def generate_ad(
 ):
     product_bytes = base64.b64decode(product_image_b64) if product_image_b64 else None
 
-    sd_prompt = build_sd_prompt(user_input, category_key, theme_key)
+    # GPT 3회 호출 병렬 실행 (순차 ~4-6s → 병렬 ~1.5s)
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        f_prompt = executor.submit(build_sd_prompt, user_input, category_key, theme_key)
+        f_copy   = executor.submit(write_copy,      user_input, category_key, history)
+        f_tags   = executor.submit(generate_tags,   user_input, category_key)
+        sd_prompt   = f_prompt.result()
+        copy_result = f_copy.result()
+        tags        = f_tags.result()
+
     logger.warning(f"[SD_PROMPT] {sd_prompt}")
-    copy_result = write_copy(user_input, category_key, history)
     copy_text = copy_result["copy"]
-    message = copy_result["message"]
-    tags = generate_tags(user_input, category_key)
+    message   = copy_result["message"]
 
     # 이미지 생성: ComfyUI API 호출
     # 텍스트 오버레이는 프론트엔드 Fabric.js 캔버스에서 처리
