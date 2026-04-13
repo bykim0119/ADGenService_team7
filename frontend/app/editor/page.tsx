@@ -108,7 +108,7 @@ export default function EditorPage() {
   /* 설정 */
   const [categoryKey, setCategoryKey]       = useState('food');
   const [themeKey, setThemeKey]             = useState('realistic');
-  const [ipAdapterWeight, setIpAdapterWeight] = useState(0.7);
+  const [ipAdapterWeight, setIpAdapterWeight] = useState(0.5);
   const [hasProductImage, setHasProductImage] = useState(false);
 
   /* Refs */
@@ -538,7 +538,7 @@ export default function EditorPage() {
               <FieldLabel>이미지 반영 강도</FieldLabel>
               <span className="text-[11px] font-bold text-primary">{ipAdapterWeight.toFixed(1)}</span>
             </div>
-            <input type="range" min="0.1" max="1.0" step="0.1" value={ipAdapterWeight}
+            <input type="range" min="0.1" max="1.0" step="0.05" value={ipAdapterWeight}
               onChange={(e) => setIpAdapterWeight(parseFloat(e.target.value))}
               className="w-full h-1.5 accent-primary cursor-pointer" />
             <div className="flex justify-between text-[9px] text-on-surface/30 font-bold mt-1">
