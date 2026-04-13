@@ -1,7 +1,7 @@
 import base64
 from celery.utils.log import get_task_logger
 from celery_app import celery_app
-from pipeline_sdxl import build_sd_prompt, write_copy
+from pipeline_sdxl import build_sd_prompt, write_copy, generate_tags
 from comfyui_client import generate_image
 
 logger = get_task_logger(__name__)
@@ -29,6 +29,7 @@ def generate_ad(
     copy_result = write_copy(user_input, category_key, history)
     copy_text = copy_result["copy"]
     message = copy_result["message"]
+    tags = generate_tags(user_input, category_key)
 
     # 이미지 생성: ComfyUI API 호출
     # 텍스트 오버레이는 프론트엔드 Fabric.js 캔버스에서 처리
@@ -40,6 +41,7 @@ def generate_ad(
     return {
         "image": base64.b64encode(image_bytes).decode(),
         "copy": copy_text,
+        "tags": tags,
         "message": message,
         "sd_prompt": sd_prompt,
     }
