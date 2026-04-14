@@ -8,22 +8,28 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
+
   const pathname = usePathname();
   const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserData({
-          name: user.user_metadata?.full_name || user.email?.split('@')[0] || "Chef",
-          email: user.email || ""
-        });
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserData({
+            name: user.user_metadata?.full_name || user.email?.split('@')[0] || "Chef",
+            email: user.email || ""
+          });
+        }
+      } catch (err) {
+        console.error("Sidebar auth error:", err);
       }
     };
     fetchUser();
   }, []);
+
 
   const navItems = [
     { href: "/", icon: Home, label: "홈" },
@@ -33,7 +39,18 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="flex flex-col py-8 px-4 h-screen w-64 bg-white border-r border-slate-100 shadow-[2px_0_8px_-4px_rgba(0,0,0,0.05)] tracking-tight z-20 shrink-0 relative">
+    <aside className={cn(
+      "flex flex-col py-8 px-4 h-screen w-64 bg-white border-r border-slate-100 shadow-[2px_0_8px_-4px_rgba(0,0,0,0.05)] tracking-tight z-20 shrink-0 relative transition-transform duration-300",
+      "lg:translate-x-0"
+    )}>
+      {/* Mobile Close Button */}
+      <button 
+        onClick={onClose}
+        className="lg:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+
       <div className="mb-10 px-3 flex items-center gap-3">
         <div className="w-9 h-9 bg-primary/10 rounded-[10px] flex items-center justify-center text-primary shadow-sm">
           <Utensils className="w-5 h-5" />
@@ -44,7 +61,8 @@ export function Sidebar() {
       </div>
 
       <div className="mb-8 flex flex-col gap-2 px-1">
-        <Link href="/editor" className="block">
+        <Link href="/editor" className="block" onClick={() => onClose?.()}>
+
           <Button className="w-full h-11 rounded-lg font-bold text-[13px] text-white bg-gradient-to-r from-primary to-[#4a7a6e] hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border-0 flex-shrink-0">
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Sparkles className="w-4 h-4 fill-white/20" />
@@ -59,7 +77,7 @@ export function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} onClick={onClose}>
               <div
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[13px] font-medium cursor-pointer group",

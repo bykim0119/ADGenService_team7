@@ -16,15 +16,19 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Bell, User, UserCircle, Download, FileDown, LogOut,
-  CheckCircle2, Info, Sparkles 
+  CheckCircle2, Info, Sparkles, Menu, ArrowLeft 
 } from "lucide-react";
 
-export function Header() {
+
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
+
   const pathname = usePathname();
   const router = useRouter();
   const isEditor = pathname.startsWith("/editor");
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([
+
     { id: 1, title: "환영합니다!", description: "이제 AdGen.ai에서 멋진 광고를 만들어 보세요.", time: "방금 전", icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, unread: true },
     { id: 2, title: "AI 엔진 업데이트", description: "새로운 AI 스타일 5종이 추가되었습니다.", time: "2시간 전", icon: <Info className="w-3.5 h-3.5 text-blue-500" />, unread: true },
     { id: 3, title: "저장 완료", description: "광고 이미지가 에셋 라이브러리에 저장되었습니다.", time: "어제", icon: <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />, unread: false },
@@ -57,48 +61,47 @@ export function Header() {
 
   if (pathname === '/export') {
     return (
-      <header className="w-full h-16 sticky top-0 z-50 flex justify-between items-center px-8 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <span className="text-[17px] font-semibold text-slate-800">내보내기 결과</span>
-          <span className="bg-primary/10 text-primary text-[10px] font-semibold tracking-widest px-2 py-0.5 rounded-full">READY</span>
+      <header className="w-full h-16 sticky top-0 z-50 flex justify-between items-center px-4 md:px-8 border-b border-surface-container-highest/60 bg-white/80 backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap">
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <span className="text-[15px] md:text-[17px] font-bold text-slate-800 tracking-tight">내보내기 결과</span>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="text-primary hover:bg-primary/5 px-4 py-2 rounded-lg font-semibold hidden sm:flex items-center gap-2 text-[13px] transition-colors">
-            <Download className="w-4 h-4" /> 모두 다운로드
-          </button>
-          <button className="bg-slate-900 hover:bg-slate-800 text-white text-[13px] px-5 py-2 font-medium rounded-full flex items-center transition-colors shadow-sm">
-            <FileDown className="w-4 h-4 mr-2" /> 전체 다운로드 ZIP
-          </button>
-          <div className="h-6 w-[1px] bg-slate-200 mx-2"></div>
-          {userEmail && <span className="text-[11px] font-semibold text-slate-500">{userEmail.split('@')[0]}</span>}
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <div className="relative group cursor-pointer">
-                <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                )}
-              </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0 mr-4 shadow-2xl border-slate-100 rounded-xl" align="end">
-              <NotificationList notifications={notifications} setNotifications={setNotifications} />
-            </PopoverContent>
-          </Popover>
 
-          <span title="로그아웃"><UserCircle onClick={handleLogout} className="w-5 h-5 text-slate-400 hover:text-red-500 cursor-pointer transition-colors" /></span>
+        <div className="flex items-center gap-2 md:gap-4">
+          <button className="bg-slate-900 hover:bg-slate-800 text-white text-[12px] md:text-[13px] px-4 md:px-5 py-2 font-medium rounded-full flex items-center transition-colors shadow-sm whitespace-nowrap">
+            <FileDown className="w-4 h-4 mr-2 hidden xs:block" /> 전체 다운로드 ZIP
+          </button>
+
         </div>
       </header>
+
     );
   }
 
   let title = "AdGen.ai 대시보드";
   if (pathname === '/assets') title = "에셋 라이브러리";
   if (pathname === '/settings') title = "설정";
+  if (pathname === '/notifications') title = "알림";
+
+
+
 
   return (
-    <header className="w-full h-14 sticky top-0 z-10 flex justify-between items-center px-8 bg-white/70 backdrop-blur-xl border-b border-surface-container-highest/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] shrink-0">
+    <header className="w-full h-14 sticky top-0 z-10 flex justify-between items-center px-4 lg:px-8 bg-white/70 backdrop-blur-xl border-b border-surface-container-highest/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] shrink-0">
       <div className="flex items-center gap-4">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="lg:hidden text-slate-500" 
+          onClick={onMenuClick}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+
         <h2 className="text-[14px] font-semibold text-on-surface tracking-tight">
           {isEditor ? "AI 광고 생성" : title}
         </h2>
@@ -106,12 +109,13 @@ export function Header() {
 
       <div className="flex items-center gap-3">
         {userEmail && (
-          <div className="flex items-center px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
+          <div className="hidden lg:flex items-center px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
              <span className="text-[11px] font-bold text-slate-500 tracking-wide">{userEmail}</span>
           </div>
         )}
+
         <div className="flex items-center gap-1.5">
-          <Popover>
+          <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-full w-8 h-8 relative">
                 <Bell className="w-4 h-4" />
@@ -121,9 +125,14 @@ export function Header() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0 shadow-2xl border-slate-100 rounded-xl" align="end">
-               <NotificationList notifications={notifications} setNotifications={setNotifications} />
+               <NotificationList 
+                 notifications={notifications} 
+                 setNotifications={setNotifications} 
+                 onClose={() => setNotificationsOpen(false)} 
+               />
             </PopoverContent>
           </Popover>
+
           <Button onClick={handleLogout} variant="ghost" size="icon" className="text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-full w-8 h-8 transition-colors" title="로그아웃">
             <LogOut className="w-4 h-4" />
           </Button>
@@ -133,7 +142,7 @@ export function Header() {
   );
 }
 
-function NotificationList({ notifications, setNotifications }: any) {
+function NotificationList({ notifications, setNotifications, onClose }: any) {
   return (
     <div className="flex flex-col">
       <div className="p-4 border-b border-slate-50 flex items-center justify-between">
@@ -170,7 +179,7 @@ function NotificationList({ notifications, setNotifications }: any) {
         ))}
       </ScrollArea>
       <div className="p-3 text-center border-t border-slate-50">
-        <Link href="/notifications">
+        <Link href="/notifications" onClick={onClose}>
           <button className="text-[11px] font-bold text-slate-400 hover:text-primary transition-colors">
             모든 알림 보기
           </button>
@@ -179,3 +188,4 @@ function NotificationList({ notifications, setNotifications }: any) {
     </div>
   );
 }
+

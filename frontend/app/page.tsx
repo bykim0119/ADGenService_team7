@@ -103,20 +103,27 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+    <div className="p-4 md:p-12 mb-2 max-w-[1600px] mx-auto w-full flex flex-col gap-8 md:gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+
+
+
+
       {/* ──────── Page Title ──────── */}
       <div
         className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
         style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
       >
-        <h1 className="text-3xl font-bold text-on-surface tracking-tight flex items-center gap-3 !border-0">
+        <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight flex items-center gap-3 !border-0">
           안녕하세요, {userName || "사용자"}님!
         </h1>
+
+
         <p className="text-[14px] font-medium text-on-surface/60 !border-0">오늘도 AI 광고 생성과 함께 완벽한 광고를 만들어 보세요.</p>
       </div>
 
       {/* Hero Slide Show: Horizontal Slide 리모델링 */}
-      <Card className="group relative overflow-hidden rounded-[36px] border-0 bg-white p-0 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] transition-all duration-1000 h-[380px]">
+      <Card className="group relative overflow-hidden rounded-[24px] md:rounded-[36px] border-0 bg-white p-0 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] transition-all duration-1000 h-[450px] md:h-[380px]">
+
 
         {/* Sliding Container */}
         <div
@@ -133,21 +140,21 @@ export default function Dashboard() {
 
               {/* Slide Content (Inside each slide for better sync) */}
               <div className="relative z-20 p-10 md:py-14 md:px-16 flex flex-col items-start justify-center h-full gap-6 max-w-4xl">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 md:gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-[1px] bg-white/40" />
-                    <span className="text-[10px] font-black text-white/80 tracking-[0.5em] uppercase">
+                    <div className="w-8 md:w-10 h-[1px] bg-white/40" />
+                    <span className="text-[9px] md:text-[10px] font-black text-white/80 tracking-[0.3em] md:tracking-[0.5em] uppercase">
                       {slide.subtitle}
                     </span>
                   </div>
 
-                  <h2 className="text-4xl md:text-[48px] font-bold text-white leading-[1.1] tracking-tight drop-shadow-xl">
+                  <h2 className="text-3xl md:text-[48px] font-bold text-white leading-[1.2] md:leading-[1.1] tracking-tight drop-shadow-xl">
                     {slide.title.split(" ").map((word, i) => (
-                      i === 0 ? <span key={i} className="text-primary-foreground/90 font-serif italic font-light mr-3">{word}</span> : <span key={i}>{word} </span>
+                      i === 0 ? <span key={i} className="text-primary-foreground/90 font-serif italic font-light mr-2 md:mr-3">{word}</span> : <span key={i}>{word} </span>
                     ))}
                   </h2>
 
-                  <p className="text-[14px] text-white/80 max-w-md leading-relaxed font-medium drop-shadow-lg whitespace-pre-wrap">
+                  <p className="text-[12px] md:text-[14px] text-white/80 max-w-md leading-relaxed font-medium drop-shadow-lg whitespace-pre-wrap line-clamp-3 md:line-clamp-none">
                     {slide.desc}
                   </p>
                 </div>
@@ -205,7 +212,7 @@ export default function Dashboard() {
                   {item.label}
                 </p>
                 <div className="flex items-baseline gap-1.5">
-                  <h3 className="text-2xl font-black text-on-surface tracking-tight leading-none">
+                  <h3 className="text-xl md:text-2xl font-black text-on-surface tracking-tight leading-none">
                     {item.value}
                   </h3>
                   <span className="text-[12px] font-bold text-on-surface/20">개</span>
