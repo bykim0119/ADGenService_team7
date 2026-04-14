@@ -113,16 +113,23 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+    <div className="p-4 md:p-12 mb-2 max-w-[1600px] mx-auto w-full flex flex-col gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+
+
+
+
+
       <div 
         className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
         style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
       >
-        <h1 className="text-3xl font-bold text-on-surface tracking-tight">설정</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight">설정</h1>
+
         <p className="text-[14px] font-medium text-on-surface/60">계정 및 브랜드 아이덴티티를 최신으로 유지하세요.</p>
       </div>
 
-      <div className="max-w-4xl mx-auto w-full space-y-12">
+      <div className="max-w-4xl mx-auto w-full space-y-6 md:space-y-8">
+
         {/* Section: Profile Info */}
         <section className="space-y-6">
           <div className="flex items-center gap-3 mb-2 px-1">
@@ -221,7 +228,8 @@ export default function SettingsPage() {
         </section>
 
         {/* Actions Container */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 pb-20">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 pb-4">
+
           <Button 
              variant="outline" 
              className="w-full sm:w-auto border-primary/5 bg-slate-50/50 text-slate-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all rounded-lg h-12 px-8 font-bold text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] shadow-sm"

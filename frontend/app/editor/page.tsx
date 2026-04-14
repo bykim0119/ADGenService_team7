@@ -20,7 +20,10 @@ import {
   Palette,
   Camera,
   Box,
+  Image as ImageIcon,
+  Upload,
 } from "lucide-react";
+
 import { Canvas, Textbox, FabricImage, Shadow } from "fabric";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -109,6 +112,7 @@ export default function EditorPage() {
 
   /* 캔버스 */
   const [platformTexts, setPlatformTexts] = useState<Record<number, any>>({});
+  const [containerWidth, setContainerWidth] = useState(460);
   const [previewImage, setPreviewImage] = useState(INITIAL_PREVIEW_IMG);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -121,12 +125,16 @@ export default function EditorPage() {
   const [themeKey, setThemeKey] = useState('realistic');
   const [ipAdapterWeight, setIpAdapterWeight] = useState(0.7);
   const [hasProductImage, setHasProductImage] = useState(false);
+  const [activeTab, setActiveTab] = useState<'settings' | 'canvas' | 'history'>('settings');
+
+
 
   /* Refs */
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<Canvas | null>(null);
   const fabricCanvasElRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const adProductFileRef = useRef<File | null>(null);
   const activeRatioIdxRef = useRef(0);
   const adHistoryRef = useRef<Array<{ user_input: string; copy: string; message: string }>>([]);
@@ -174,7 +182,7 @@ export default function EditorPage() {
 
     const imgUrl = generatedImage || previewImage;
     const ratio = ASPECT_RATIOS[activeRatioIdx];
-    const containerWidth = 460;
+    // const containerWidth = 460; // Use state instead
     let targetHeight = containerWidth;
     if (ratio.id === '9:16') targetHeight = containerWidth * (16 / 9);
     if (ratio.id === '16:9') targetHeight = containerWidth * (9 / 16);
@@ -446,19 +454,35 @@ export default function EditorPage() {
   /* ─── Effects ─── */
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.replace('/login'); return; }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setRestaurantName(user.user_metadata?.restaurant_name || '');
-      setIsLoadingUser(false);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          router.replace('/login');
+          return;
+        }
+        setRestaurantName(user.user_metadata?.restaurant_name || '');
+      } catch (err) {
+        console.error("Auth error:", err);
+      } finally {
+        setIsLoadingUser(false);
+      }
     };
     init();
+
+
+    const handleResize = () => {
+      const w = Math.min(460, window.innerWidth - 64);
+      setContainerWidth(w);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [router]);
 
   useEffect(() => {
     if (!isLoadingUser && fabricCanvasElRef.current && !canvasRef.current) {
       const fc = new Canvas(fabricCanvasElRef.current, {
-        width: 460, height: 460, backgroundColor: '#ffffff', preserveObjectStacking: true,
+        width: containerWidth, height: containerWidth, backgroundColor: '#ffffff', preserveObjectStacking: true,
       });
       canvasRef.current = fc;
       fc.on('object:modified', syncCanvasToState);
@@ -485,40 +509,139 @@ export default function EditorPage() {
 
   /* ─── JSX ─── */
   return (
-    <div className="flex h-full overflow-hidden bg-surface">
+
+    <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-surface relative">
+      {/* ══════ MOBILE TABS ══════ */}
+      <div className="lg:hidden flex border-b border-surface-container-highest/40 bg-white">
+        {(['settings', 'canvas', 'history'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "flex-1 py-3 text-[11px] font-bold transition-colors border-b-2",
+              activeTab === tab
+                ? "text-primary border-primary bg-primary/5"
+                : "text-slate-400 border-transparent hover:text-slate-600"
+            )}
+          >
+            {tab === 'settings' ? '설정' : tab === 'canvas' ? '편집기' : '히스토리'}
+          </button>
+        ))}
+      </div>
 
       {/* ══════ LEFT: 설정 패널 ══════ */}
-      <aside className="w-64 flex-shrink-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-3.5 p-4 bg-surface-container-lowest/30">
+      <aside className={cn(
+        "w-full lg:w-64 flex-1 lg:flex-none min-h-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-3.5 p-4 pb-8 bg-surface-container-lowest/30 transition-all",
 
-        {/* 제품 이미지 업로드 */}
-        <Card
-          onClick={() => fileInputRef.current?.click()}
-          className="p-3 px-5 rounded-full bg-white border border-dashed border-slate-200 hover:border-primary transition-all cursor-pointer active:scale-[0.98] shadow-sm group"
-        >
-          <input type="file" accept="image/*" ref={fileInputRef} className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                adProductFileRef.current = file;
-                setHasProductImage(true);
-                const r = new FileReader();
-                r.onload = (ev) => { setPreviewImage(ev.target?.result as string); setGeneratedImage(null); };
-                r.readAsDataURL(file);
-              }
-            }}
-          />
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform flex-shrink-0">
-              <UploadCloud className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[12px] font-bold text-slate-800 leading-tight">
-                {hasProductImage ? '이미지 변경' : '제품 이미지 (선택)'}
-              </p>
-              <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG · 10MB 이하</p>
-            </div>
+        activeTab !== 'settings' && "hidden lg:flex"
+      )}>
+
+
+
+
+        <Card className="p-4 border-slate-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] rounded-2xl bg-white space-y-4">
+          <SectionHeading>제품 이미지 추가</SectionHeading>
+
+          {/* Mobile: Grid Layout (Gallery/Camera) */}
+          <div className="grid grid-cols-2 gap-2 md:hidden">
+            {/* Gallery Upload */}
+            <Card
+              onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                "p-3 rounded-2xl bg-white border border-slate-200 hover:border-primary transition-all cursor-pointer active:scale-[0.95] shadow-sm group flex flex-col items-center justify-center gap-2",
+                hasProductImage && adProductFileRef.current && !adProductFileRef.current.name.includes('camera') 
+                  ? "border-primary bg-primary/5" 
+                  : ""
+              )}
+            >
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                hasProductImage && adProductFileRef.current && !adProductFileRef.current.name.includes('camera') 
+                  ? "bg-primary text-white" 
+                  : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+              )}>
+                <ImageIcon className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700">갤러리</span>
+            </Card>
+
+            {/* Camera Upload */}
+            <Card
+              onClick={() => cameraInputRef.current?.click()}
+              className={cn(
+                "p-3 rounded-2xl bg-white border border-slate-200 hover:border-primary transition-all cursor-pointer active:scale-[0.95] shadow-sm group flex flex-col items-center justify-center gap-2",
+                hasProductImage && adProductFileRef.current && adProductFileRef.current.name.includes('camera')
+                  ? "border-primary bg-primary/5" 
+                  : ""
+              )}
+            >
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                hasProductImage && adProductFileRef.current && adProductFileRef.current.name.includes('camera')
+                  ? "bg-primary text-white" 
+                  : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+              )}>
+                <Camera className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700">촬영하기</span>
+            </Card>
           </div>
+
+          {/* PC: Original Style (Single Wide Box) */}
+          <Card
+            onClick={() => fileInputRef.current?.click()}
+            className={cn(
+              "hidden md:flex flex-col items-center justify-center p-5 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30 hover:bg-primary/5 hover:border-primary/30 transition-all cursor-pointer group gap-3 animate-in fade-in duration-500",
+              hasProductImage && "border-primary/20 bg-primary/5"
+            )}
+          >
+             <input type="file" accept="image/*" ref={fileInputRef} className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    adProductFileRef.current = file;
+                    setHasProductImage(true);
+                    const r = new FileReader();
+                    r.onload = (ev) => { setPreviewImage(ev.target?.result as string); setGeneratedImage(null); };
+                    r.readAsDataURL(file);
+                  }
+                }}
+              />
+              <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const cameraFile = new File([file], `camera_${file.name}`, { type: file.type });
+                    adProductFileRef.current = cameraFile;
+                    setHasProductImage(true);
+                    const r = new FileReader();
+                    r.onload = (ev) => { setPreviewImage(ev.target?.result as string); setGeneratedImage(null); };
+                    r.readAsDataURL(file);
+                  }
+                }}
+              />
+             <div className="w-11 h-11 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+               <UploadCloud className="w-5 h-5 text-slate-400 group-hover:text-primary" />
+             </div>
+             <div className="text-center">
+               <p className="text-[12px] font-bold text-slate-600">제품 이미지 업로드 <span className="text-[10px] font-medium text-slate-400 opacity-90">(선택)</span></p>
+               <p className="text-[10px] text-slate-400 mt-0.5">이미지를 드래그하거나 클릭하여 추가하세요</p>
+             </div>
+
+          </Card>
+
+
+
+
+          
+          {hasProductImage && (
+            <p className="text-[10px] text-primary font-bold text-center mt-1 animate-in fade-in">
+              이미지가 선택되었습니다.
+            </p>
+          )}
         </Card>
+
+
 
         {/* 업종 카테고리 */}
         <Card className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
@@ -623,12 +746,21 @@ export default function EditorPage() {
       </aside>
 
       {/* ══════ CENTER: 캔버스 미리보기 ══════ */}
-      <main className="flex-1 min-w-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-4 p-5">
+      <main className={cn(
+        "flex-1 min-w-0 min-h-0 border-r border-surface-container-highest/40 overflow-y-auto flex flex-col gap-4 p-4 pb-8",
+
+
+        activeTab !== 'canvas' && "hidden lg:flex"
+      )}>
+
+
+
 
         {/* 비율 탭 */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <h3 className="text-[11px] font-bold text-on-surface/50 uppercase tracking-wider">디자인 미리보기</h3>
-          <div className="bg-white p-1 rounded-full flex gap-1 border border-surface-container-highest/60 shadow-sm">
+          <div className="bg-white p-1 rounded-full flex justify-center gap-1 border border-surface-container-highest/60 shadow-sm overflow-x-auto no-scrollbar max-w-full mx-auto md:mx-0">
+
             {ASPECT_RATIOS.map((r, i) => (
               <button key={r.id} onClick={() => handleRatioChange(i)}
                 className={cn(
@@ -641,6 +773,7 @@ export default function EditorPage() {
           </div>
         </div>
 
+
         {/* 캔버스 */}
         <div className="flex justify-center">
           <div
@@ -648,7 +781,7 @@ export default function EditorPage() {
               'bg-white rounded-2xl shadow-xl overflow-hidden border border-surface-container-highest/60 relative transition-all duration-500',
               ASPECT_RATIOS[activeRatioIdx].class
             )}
-            style={{ width: '100%', maxWidth: '460px' }}
+            style={{ width: '100%', maxWidth: `${containerWidth}px` }}
           >
             <div className="w-full h-full flex items-center justify-center overflow-hidden bg-surface-container-low">
               <canvas ref={fabricCanvasElRef} />
@@ -736,11 +869,12 @@ export default function EditorPage() {
         </Card>
 
         {/* 에셋 저장 */}
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-center md:justify-end mt-2">
           <Button
             onClick={handleFinalExport}
             disabled={isExporting || !generatedImage}
-            className="w-[224px] h-11 rounded-lg font-bold text-[13px] text-white bg-primary hover:bg-primary/90 shadow-md shadow-primary/10 hover:shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border border-primary/20 disabled:opacity-60 disabled:bg-primary/80 disabled:cursor-not-allowed flex-shrink-0"
+            className="w-full md:w-[224px] h-11 rounded-full font-bold text-[13px] text-white bg-primary hover:bg-primary/90 shadow-md shadow-primary/10 hover:shadow-primary/20 active:scale-[0.98] transition-all overflow-hidden relative group border border-primary/20 disabled:opacity-60 disabled:bg-primary/80 disabled:cursor-not-allowed flex-shrink-0"
+
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
@@ -751,7 +885,15 @@ export default function EditorPage() {
       </main>
 
       {/* ══════ RIGHT: 생성 히스토리 ══════ */}
-      <aside className="w-72 flex-shrink-0 flex flex-col h-full">
+      <aside className={cn(
+        "w-full lg:w-72 flex-1 lg:flex-none min-h-0 flex flex-col transition-all overflow-y-auto pb-8",
+
+        activeTab !== 'history' && "hidden lg:flex"
+      )}>
+
+
+
+
         <div className="flex-shrink-0 px-4 pt-4 border-b border-surface-container-highest/40">
           <SectionHeading>생성 히스토리</SectionHeading>
         </div>
