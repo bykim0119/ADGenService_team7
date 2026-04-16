@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface AssetRecord {
+
   id: string;
   generated_image_url: string;
   created_at: string;
@@ -147,12 +148,18 @@ export default function AssetsPage() {
   };
 
   return (
-    <div className="p-8 md:p-12 mb-20 max-w-[1600px] mx-auto w-full flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+    <div className="p-4 md:p-12 mb-2 max-w-[1600px] mx-auto w-full flex flex-col gap-8 md:gap-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+
+
+
+
       <div 
         className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-8 slide-in-from-left-8 duration-1000 ease-out"
         style={{ border: 'none', boxShadow: 'none', outline: 'none' }}
       >
-        <h1 className="text-3xl font-bold text-on-surface tracking-tight !border-0">에셋 라이브러리</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight !border-0">에셋 라이브러리</h1>
+
+
         <p className="text-[14px] font-medium text-on-surface/60 !border-0">관리 중인 모든 브랜드 에셋과 광고 디자인을 확인하세요.</p>
       </div>
       
@@ -175,7 +182,8 @@ export default function AssetsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {assets.map((asset) => (
-            <Card key={asset.id} className="group overflow-hidden rounded-xl border border-surface-container-highest/60 hover:border-primary/30 transition-all duration-300 hover:shadow-lg flex flex-col bg-white">
+            <Card key={asset.id} className="group overflow-hidden rounded-2xl border border-surface-container-highest/60 hover:border-primary/30 transition-all duration-300 hover:shadow-lg flex flex-col bg-white">
+
               <div className="aspect-square relative overflow-hidden bg-surface-container-low">
                 <img 
                   src={asset.generated_image_url} 
@@ -191,30 +199,31 @@ export default function AssetsPage() {
                   </Badge>
                 </div>
                 
-                <div className="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] flex items-center justify-center gap-3">
+                <div className="absolute top-2.5 right-2.5 md:inset-0 md:bg-on-surface/40 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 md:backdrop-blur-[2px] flex md:items-center md:justify-center gap-2 md:gap-3 z-20">
                   <Button 
                     variant="destructive" 
                     size="icon" 
                     onClick={(e) => { e.stopPropagation(); handleDelete(asset.id); }}
-                    className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 shadow-xl border-2 border-white/20 transition-transform active:scale-95"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-500/90 hover:bg-red-600 md:bg-red-500 shadow-lg border-2 border-white/20 transition-transform active:scale-95"
                     title="에셋 삭제"
                   >
-                    <Trash2 className="w-4 h-4 text-white" />
+                    <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                   </Button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); handlePreview(asset.generated_image_url); }} 
-                    className="w-10 h-10 rounded-full bg-white text-on-surface hover:bg-surface-container-highest flex items-center justify-center transition-all shadow-lg active:scale-95"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 text-on-surface hover:bg-surface-container-highest flex items-center justify-center transition-all shadow-lg active:scale-95"
                     title="원본 보기"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleDownload(asset.generated_image_url, asset.campaigns?.menu_name || 'plating_ai'); }}
-                    className="w-10 h-10 rounded-full bg-primary text-white hover:bg-primary/90 flex items-center justify-center transition-all shadow-lg active:scale-95"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/95 text-white hover:bg-primary/90 flex items-center justify-center transition-all shadow-lg active:scale-95"
                     title="다운로드"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
+
                 </div>
               </div>
               
