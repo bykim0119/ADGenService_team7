@@ -486,8 +486,6 @@ export default function EditorPage() {
       });
       canvasRef.current = fc;
       fc.on('object:modified', syncCanvasToState);
-      fc.on('selection:created', syncCanvasToState);
-      fc.on('selection:updated', syncCanvasToState);
       const loadFonts = async () => {
         try {
           await Promise.all([
