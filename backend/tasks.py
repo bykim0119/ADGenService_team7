@@ -2,7 +2,7 @@ import base64
 import io
 from celery.utils.log import get_task_logger
 from celery_app import celery_app
-from pipeline_sdxl import build_sd_prompt, write_copy, generate_depth_map, _get_rembg_session
+from pipeline_sdxl import generate_prompt_and_copy, generate_depth_map, _get_rembg_session
 from comfyui_client import generate_image, generate_plating_image
 from moods import MOODS
 from PIL import Image
@@ -26,11 +26,11 @@ def generate_ad(
 ):
     product_bytes = base64.b64decode(product_image_b64) if product_image_b64 else None
 
-    sd_prompt = build_sd_prompt(user_input, category_key, theme_key)
+    gen_result = generate_prompt_and_copy(user_input, category_key, theme_key, history)
+    sd_prompt = gen_result["sd_prompt"]
     logger.warning(f"[SD_PROMPT] {sd_prompt}")
-    copy_result = write_copy(user_input, category_key, history)
-    copy_text = copy_result["copy"]
-    message = copy_result["message"]
+    copy_text = gen_result["copy"]
+    message = gen_result["message"]
 
     # 이미지 생성: ComfyUI API 호출
     # 텍스트 오버레이는 프론트엔드 Fabric.js 캔버스에서 처리

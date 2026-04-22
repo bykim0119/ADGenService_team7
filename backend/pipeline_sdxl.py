@@ -112,6 +112,71 @@ def _load_ip_pipeline():
         _ip_pipe.to(DEVICE)
 
 
+def generate_prompt_and_copy(user_input: str, category: str, theme: str, history: list) -> dict:
+    """GPT 1회 호출로 SDXL 프롬프트 + 광고 카피를 함께 생성."""
+    import json as _json
+
+    category_prompt = CATEGORIES[category]["prompt"]
+    category_label = CATEGORIES[category]["label"]
+    theme_prompt = THEMES[theme]["prompt"]
+    history_text = _json.dumps(history, ensure_ascii=False)
+
+    response = _openai.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You handle two tasks at once for a small-business advertisement generator. "
+                    "Return ONLY valid JSON with this exact shape:\n"
+                    '{"sd_prompt": "english prompt", "copy": "korean ad copy", "message": "korean guidance"}\n\n'
+                    "sd_prompt rules:\n"
+                    "1. Output entirely in English.\n"
+                    "2. Keep it under 55 English words.\n"
+                    "3. The first words must describe the main subject.\n"
+                    "4. The image must look like a polished commercial advertisement, not a poster mockup.\n"
+                    "5. Do NOT mention text overlay, captions, typography, letters, logo placement, poster layout, banners, or watermarks.\n"
+                    "6. Prefer concrete visual details: subject, action, camera framing, composition, lighting, mood, style.\n"
+                    "7. Put subject and composition first, then lighting and mood, then style keywords last.\n"
+                    "8. Focus on one clear scene and avoid vague filler words.\n\n"
+                    f"copy/message rules for {category_label}:\n"
+                    "1. copy must be impactful Korean ad copy, maximum 2 lines, using \\n if needed.\n"
+                    "2. Even if information is limited, always write copy.\n"
+                    "3. message is optional Korean guidance or feedback for the user; if unnecessary, return an empty string.\n"
+                    "4. If conversation history exists, reflect it when writing the copy.\n"
+                    "5. Output nothing except the JSON object."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"User scene description (highest priority): {user_input}\n"
+                    f"Category context (atmosphere reference): {category_prompt}\n"
+                    f"Visual theme (style reference): {theme_prompt}\n"
+                    f"Conversation history JSON: {history_text}\n\n"
+                    "Generate sd_prompt, copy, and message now."
+                ),
+            },
+        ],
+    )
+
+    content = response.choices[0].message.content.strip()
+    try:
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+        data = _json.loads(content)
+    except _json.JSONDecodeError:
+        data = {"sd_prompt": "", "copy": content, "message": ""}
+
+    return {
+        "sd_prompt": data.get("sd_prompt", "").strip(),
+        "copy": data.get("copy", "").strip(),
+        "message": data.get("message", "").strip(),
+    }
+
+
 def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
     """GPT-5-mini를 사용해 카테고리/테마/사용자 입력을 기반으로 SDXL용 영문 프롬프트 생성."""
     category_prompt = CATEGORIES[category]["prompt"]
