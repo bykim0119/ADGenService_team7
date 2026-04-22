@@ -18,7 +18,7 @@ SDXL_CKPT        = "dreamshaper_xl.safetensors"
 IPADAPTER_CKPT   = "ip-adapter-plus_sdxl_vit-h.bin"
 CLIP_VISION      = "clip_vit_h.safetensors"
 CONTROLNET_CKPT  = "controlnet-depth-sdxl-1.0.safetensors"
-NEGATIVE_PROMPT  = "text, watermark, blurry, low quality, deformed, ugly, nsfw"
+NEGATIVE_PROMPT  = "text, watermark, blurry, low quality, lowres, jpeg artifacts, deformed, ugly, nsfw, distorted, bad anatomy, bad hands, extra fingers, extra limbs, duplicate, cropped, out of frame, oversaturated, overexposed, underexposed"
 
 
 def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
@@ -50,8 +50,8 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
                 "negative": ["3", 0],
                 "latent_image": ["4", 0],
                 "seed": seed,
-                "steps": 24,
-                "cfg": 7.5,
+                "steps": 26,
+                "cfg": 8.0,
                 "sampler_name": "euler_ancestral",
                 "scheduler": "karras",
                 "denoise": 1.0,
@@ -87,7 +87,7 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
                 "ipadapter": ["9", 0],
                 "image": ["11", 0],
                 "clip_vision": ["10", 0],
-                "weight": 0.5,
+                "weight": 0.35,
                 "weight_type": "linear",
                 "combine_embeds": "concat",
                 "start_at": 0.0,

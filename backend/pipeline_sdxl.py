@@ -123,14 +123,17 @@ def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
             {
                 "role": "system",
                 "content": (
-                    "You are an expert at writing Stable Diffusion XL image generation prompts for advertisement images. "
+                    "You are an expert at writing Stable Diffusion XL prompts for high-quality commercial advertisement images. "
                     "CRITICAL RULES:\n"
                     "1. Output MUST be entirely in English — no Korean, no other languages, English only.\n"
-                    "2. The prompt is fed to a CLIP encoder with a hard 77-token limit. Keep it strictly under 55 English words.\n"
-                    "3. Structure: [subject/person/action/food] [mood/lighting] [style keywords]. Most important content first.\n"
-                    "4. If the user mentions a person, action, or specific food, it MUST appear at the start of the prompt.\n"
-                    "5. Style and atmosphere keywords go last — they are expendable if truncated.\n"
-                    "6. Output only the prompt text. No explanation, no Korean, no other commentary."
+                    "2. Keep it strictly under 55 English words because the prompt is sent to a CLIP encoder.\n"
+                    "3. The first words must describe the main subject the image should show.\n"
+                    "4. The image must look like a polished commercial advertisement, not a poster mockup.\n"
+                    "5. Do NOT mention text overlay, captions, typography, letters, logo placement, poster layout, banners, or watermarks.\n"
+                    "6. Prefer concrete visual details: subject, action, camera framing, composition, lighting, mood, style.\n"
+                    "7. Put the most important subject and composition first, then lighting/mood, then style keywords last.\n"
+                    "8. Focus on one clear scene, avoid long keyword stuffing, and avoid vague filler words.\n"
+                    "9. Output only the prompt text. No explanation, no numbering, no Korean, no quotes."
                 ),
             },
             {
@@ -139,7 +142,7 @@ def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
                     f"User scene description (highest priority): {user_input}\n"
                     f"Category context (atmosphere reference): {category_prompt}\n"
                     f"Visual theme (style reference): {theme_prompt}\n\n"
-                    "Write the SDXL prompt:"
+                    "Write one concise SDXL advertisement prompt that keeps the user scene first, reflects the category and theme, and emphasizes realistic, visually strong commercial imagery:"
                 ),
             },
         ],
