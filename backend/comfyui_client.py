@@ -50,7 +50,7 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
                 "negative": ["3", 0],
                 "latent_image": ["4", 0],
                 "seed": seed,
-                "steps": 26,
+                "steps": 24,
                 "cfg": 8.0,
                 "sampler_name": "euler_ancestral",
                 "scheduler": "karras",
