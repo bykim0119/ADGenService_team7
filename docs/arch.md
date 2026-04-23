@@ -55,14 +55,14 @@ flowchart TD
         P3["해시태그 생성\n→ SNS 해시태그 6개"]
     end
 
-    subgraph COMFY["ComfyUI 서비스 (GPU · 포트 8188)"]
-        WF["SDXL 워크플로우\nDreamShaper XL · 24단계 · 1024×1024"]
-        IPA["IP-Adapter Plus\nViT-H · 가중치 0.7 (기본값)"]
+    subgraph COMFY["ComfyUI 서비스 (GPU)"]
+        WF["SDXL 워크플로우\nDreamShaper XL"]
+        IPA["IP-Adapter Plus"]
     end
 
     PROD{"제품 이미지 있음?"}
 
-    OUT["이미지 파일\nRedis 저장 (1시간 유지)"]
+    OUT["이미지 파일\nRedis 임시 저장"]
 
     CANVAS["Fabric.js 캔버스 (프론트엔드)\n텍스트 오버레이 · 비율 선택 · 레이어 편집"]
 
@@ -70,7 +70,7 @@ flowchart TD
     IN --> P2
     IN --> P3
     P1 --> WF
-    PROD -- "예\n(EXIF 보정·RGB 변환만)" --> IPA
+    PROD -- "예" --> IPA
     WF --> IPA
     PROD -- "아니오" --> WF
     IPA --> OUT
@@ -79,8 +79,7 @@ flowchart TD
     OUT --> CANVAS
 ```
 
-> **참고:** 제품 이미지는 배경 제거(rembg) 없이 원본 그대로 IP-Adapter에 전달됩니다.
-> 전처리는 EXIF 회전 보정과 RGB 변환(PIL)만 수행합니다.
+> **참고:** 제품 이미지는 배경 제거 없이 원본 그대로 IP-Adapter에 전달됩니다.
 
 ---
 
