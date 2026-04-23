@@ -55,3 +55,6 @@ Thumbs.db
 # 임시/압축 파일
 *.zip
 plating-ai-main/
+
+# Superpowers 내부 문서
+docs/superpowers/

@@ -47,22 +47,22 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    IN["user_input · category · theme\nproduct_image (optional)"]
+    IN["사용자 입력 · 카테고리 · 테마\n제품 이미지 (선택 사항)"]
 
     subgraph GPT["OpenAI API (GPT-5-mini) — 3회 병렬 호출"]
-        P1["build_sd_prompt()\n→ 영문 SDXL 프롬프트"]
-        P2["write_copy()\n→ 한국어 광고 카피 (멀티턴)"]
-        P3["generate_tags()\n→ SNS 해시태그 6개"]
+        P1["SD 프롬프트 생성\n→ 이미지 생성용 프롬프트"]
+        P2["광고 카피 작성\n→ 한국어 광고 카피"]
+        P3["해시태그 생성\n→ SNS 해시태그 6개"]
     end
 
-    subgraph COMFY["ComfyUI Service (GPU · port 8188)"]
-        WF["SDXL Workflow\nDreamShaper XL · 24 steps · 1024×1024"]
-        IPA["IP-Adapter Plus\nViT-H · weight=0.7 (기본값)"]
+    subgraph COMFY["ComfyUI 서비스 (GPU · 포트 8188)"]
+        WF["SDXL 워크플로우\nDreamShaper XL · 24단계 · 1024×1024"]
+        IPA["IP-Adapter Plus\nViT-H · 가중치 0.7 (기본값)"]
     end
 
-    PROD{"product_image?"}
+    PROD{"제품 이미지 있음?"}
 
-    OUT["PNG → base64\nRedis 저장 (TTL 1h)"]
+    OUT["이미지 파일\nRedis 저장 (1시간 유지)"]
 
     CANVAS["Fabric.js 캔버스 (프론트엔드)\n텍스트 오버레이 · 비율 선택 · 레이어 편집"]
 
@@ -70,9 +70,9 @@ flowchart TD
     IN --> P2
     IN --> P3
     P1 --> WF
-    PROD -- "Yes\n(EXIF 보정·RGB 변환만)" --> IPA
+    PROD -- "예\n(EXIF 보정·RGB 변환만)" --> IPA
     WF --> IPA
-    PROD -- "No" --> WF
+    PROD -- "아니오" --> WF
     IPA --> OUT
     P2 --> CANVAS
     P3 --> CANVAS
