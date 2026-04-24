@@ -15,7 +15,7 @@ _openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
-    """GPT-4o-mini를 사용해 카테고리/테마/사용자 입력을 기반으로 SDXL용 영문 프롬프트 생성."""
+    """기본 버전으로 원복: 카테고리/테마/사용자 입력을 기반으로 SDXL용 영문 프롬프트 생성."""
     category_prompt = CATEGORIES[category]["prompt"]
     theme_prompt = THEMES[theme]["prompt"]
 
@@ -24,25 +24,11 @@ def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are an expert at writing Stable Diffusion XL image generation prompts for advertisement images. "
-                    "CRITICAL RULES:\n"
-                    "1. Output MUST be entirely in English — no Korean, no other languages, English only.\n"
-                    "2. The prompt is fed to a CLIP encoder with a hard 77-token limit. Keep it strictly under 55 English words.\n"
-                    "3. Structure: [subject/person/action/food] [mood/lighting] [style keywords]. Most important content first.\n"
-                    "4. If the user mentions a person, action, or specific food, it MUST appear at the start of the prompt.\n"
-                    "5. Style and atmosphere keywords go last — they are expendable if truncated.\n"
-                    "6. Output only the prompt text. No explanation, no Korean, no other commentary."
-                ),
+                "content": "You are a professional assistant that generates high-quality image prompts for SDXL in English. Output ONLY the prompt.",
             },
             {
                 "role": "user",
-                "content": (
-                    f"User scene description (highest priority): {user_input}\n"
-                    f"Category context (atmosphere reference): {category_prompt}\n"
-                    f"Visual theme (style reference): {theme_prompt}\n\n"
-                    "Write the SDXL prompt:"
-                ),
+                "content": f"Generate an advertising image prompt for: {user_input}. Style: {theme_prompt}. Category: {category_prompt}.",
             },
         ],
     )
@@ -59,12 +45,13 @@ def generate_tags(user_input: str, category: str) -> list[str]:
             {
                 "role": "system",
                 "content": (
-                    f"당신은 {category_label} 업종 SNS 마케팅 전문가입니다. "
-                    "사용자의 광고 설명을 보고 SNS에서 효과적인 한국어 해시태그 6개를 생성하세요. "
+                    f"당신은 {category_label} 분야의 SNS 인기 인플루언서이자 마케팅 전문가입니다. "
+                    "인스타그램, 틱톡 등 최신 트렌드를 반영하여 클릭율을 높일 수 있는 매력적인 한국어 해시태그 6개를 생성하세요. "
+                    "단순한 키워드 나열이 아닌, 검색량이 많고 타겟팅이 명확한 태그를 선정하십시오. "
                     "반드시 JSON 형식으로만 응답하세요: {\"tags\": [\"#태그1\", \"#태그2\", ...]}"
                 ),
             },
-            {"role": "user", "content": user_input},
+            {"role": "user", "content": f"작업 컨셉: {user_input}"},
         ],
     )
     content = response.choices[0].message.content.strip()
@@ -73,7 +60,6 @@ def generate_tags(user_input: str, category: str) -> list[str]:
             content = content.split("```")[1]
             if content.startswith("json"):
                 content = content[4:]
-        import json as _json
         data = _json.loads(content)
         return data.get("tags", [])
     except Exception:
@@ -81,24 +67,27 @@ def generate_tags(user_input: str, category: str) -> list[str]:
 
 
 def write_copy(user_input: str, category: str, history: list) -> dict:
-    """GPT-4o-mini를 사용해 멀티턴 컨텍스트를 반영한 한국어 광고 문구 생성.
-    반환: {"copy": str, "message": str}
-    """
-    category_label = CATEGORIES[category]["label"]
+    """GPT-5-mini를 사용해 사용자의 의도와 마케팅 전략이 반영된 세련된 광고 문구 생성."""
+    cat_data = CATEGORIES[category]
+    category_label = cat_data["label"]
+    strategy = cat_data.get("strategy", "")
 
     messages = [
         {
             "role": "system",
             "content": (
-                f"당신은 {category_label} 업종 소상공인을 위한 광고 카피라이터입니다. "
+                f"당신은 글로벌 광고 대행사의 수석 카피라이터이며, 현재 {category_label} 프로젝트를 담당하고 있습니다. "
+                "사용자의 요청(Concept)을 완벽하게 이해하고, 소비자의 마음을 움직이는 심리학적 마케팅 기법을 적용하세요. "
                 "반드시 아래 JSON 형식으로만 응답하세요:\n"
-                '{"copy": "광고 문구만", "message": "사용자에게 전달할 안내만"}\n\n'
-                "엄격한 규칙:\n"
-                "- copy: 순수 광고 문구만. 반드시 2줄 이내(줄바꿈 \\n 사용). 어떤 안내·설명·요청도 포함 금지.\n"
-                "- message: 추가 정보 요청, 피드백 제안 등 사용자에게 전달할 안내. 없으면 반드시 빈 문자열(\"\").\n"
-                "- copy 필드에 안내·설명 문구를 절대 넣지 마세요. 안내는 message에만.\n"
-                "- 이전 대화 히스토리가 있다면 피드백을 반영해 copy를 개선\n"
-                "- 예시 copy: \"지금 이 순간, 특별한 맛\\n오늘만의 특별 메뉴를 만나보세요\""
+                '{"copy": "광고 문구", "message": "사용자 안내"}\n\n'
+                "고도화 지침:\n"
+                f"- 전략: {strategy}\n"
+                "- 창의성: 사용자의 입력을 그대로 복사하거나 단순히 요약하지 마세요. 컨셉의 핵심 가치를 뽑아내어 새로운 비유나 감성적인 언어로 재창조하십시오.\n"
+                "- 톤앤매너: 사용자의 입력된 톤을 유지하되, 더욱 세련되고 감각적인 표현으로 정제하세요.\n"
+                "- 구성: copy 필드는 반드시 '헤드라인\\n서브카피' 구조로 2줄 이내로 작성하세요. (줄바꿈 \\n 사용)\n"
+                "- 금기: '...하세요', '~입니다'와 같은 평범한 어미보다는 명사형 종결이나 감각적인 의성어/의태어를 적절히 활용하세요.\n"
+                "- 가독성: 텍스트가 이미지를 가리지 않도록 핵심만 간결하고 임팩트 있게 작성하세요.\n"
+                "- 안내: 문구에 대한 짧은 해설이나 피드백은 'message' 필드에 담아주세요."
             ),
         }
     ]
@@ -107,7 +96,7 @@ def write_copy(user_input: str, category: str, history: list) -> dict:
         messages.append({"role": "user", "content": turn["user_input"]})
         messages.append({"role": "assistant", "content": f'{{"copy": {_json.dumps(turn["copy"], ensure_ascii=False)}, "message": ""}}'})
 
-    messages.append({"role": "user", "content": user_input})
+    messages.append({"role": "user", "content": f"이번 광고의 핵심 프로젝트 컨셉입니다: {user_input}"})
 
     response = _openai.chat.completions.create(
         model="gpt-5-mini",
@@ -122,6 +111,7 @@ def write_copy(user_input: str, category: str, history: list) -> dict:
         data = _json.loads(content)
     except _json.JSONDecodeError:
         data = {"copy": content, "message": ""}
+    
     return {
         "copy": data.get("copy", content).strip(),
         "message": data.get("message", "").strip(),
