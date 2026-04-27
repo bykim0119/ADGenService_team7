@@ -15,7 +15,7 @@ _openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
-    """기본 버전으로 원복: 카테고리/테마/사용자 입력을 기반으로 SDXL용 영문 프롬프트 생성."""
+    """카테고리/테마/사용자 입력을 기반으로 SDXL용 영문 프롬프트 생성."""
     category_prompt = CATEGORIES[category]["prompt"]
     theme_prompt = THEMES[theme]["prompt"]
 
@@ -24,11 +24,25 @@ def build_sd_prompt(user_input: str, category: str, theme: str) -> str:
         messages=[
             {
                 "role": "system",
-                "content": "You are a professional assistant that generates high-quality image prompts for SDXL in English. Output ONLY the prompt.",
+                "content": (
+                    "You are an expert at writing Stable Diffusion XL image generation prompts for advertisement images. "
+                    "CRITICAL RULES:\n"
+                    "1. Output MUST be entirely in English — no Korean, no other languages, English only.\n"
+                    "2. The prompt is fed to a CLIP encoder with a hard 77-token limit. Keep it strictly under 55 English words.\n"
+                    "3. Structure: [subject/person/action/food] [mood/lighting] [style keywords]. Most important content first.\n"
+                    "4. If the user mentions a person, action, or specific food, it MUST appear at the start of the prompt.\n"
+                    "5. Style and atmosphere keywords go last — they are expendable if truncated.\n"
+                    "6. Output only the prompt text. No explanation, no Korean, no other commentary."
+                ),
             },
             {
                 "role": "user",
-                "content": f"Generate an advertising image prompt for: {user_input}. Style: {theme_prompt}. Category: {category_prompt}.",
+                "content": (
+                    f"User scene description (highest priority): {user_input}\n"
+                    f"Category context (atmosphere reference): {category_prompt}\n"
+                    f"Visual theme (style reference): {theme_prompt}\n\n"
+                    "Write the SDXL prompt:"
+                ),
             },
         ],
     )
