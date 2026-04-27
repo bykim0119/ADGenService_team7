@@ -40,7 +40,7 @@ def _build_workflow(prompt: str, uploaded_image_name: str | None) -> dict:
         },
         "4": {
             "class_type": "EmptyLatentImage",
-            "inputs": {"width": 1024, "height": 1024, "batch_size": 1},
+            "inputs": {"width": 768, "height": 768, "batch_size": 1},
         },
         "6": {
             "class_type": "KSampler",
