@@ -268,3 +268,11 @@ kubectl port-forward deployment/comfyui 8188:8188
 | h94/IP-Adapter Plus (SDXL ViT-H) | Apache 2.0 |
 | ComfyUI | GPL-3.0 (서버사이드) |
 | GPT-4o-mini (OpenAI API) | 상업 이용 허용 |
+
+## 협업일지
+
+- 김보윤 : [협업일지-김보윤](docs/collabnote.md)
+- 김민철 : https://www.notion.so/AI-7-342736f39f50808aa53fd445c69a6ec2
+- 김나연 : 
+- 마정흠 : [협업일지-마정흠](docs/2026년4월_협업일지_마정흠.md)
+- 한경섭 : https://www.notion.so/2026-03-30-2026-04-28-34f6d27ac2f880b9983fe82c4fbea953
