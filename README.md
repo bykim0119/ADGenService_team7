@@ -1,7 +1,7 @@
 # AdGen.ai — AI 광고 비주얼 제작 서비스
 ![제품 시연](image-1.png)
 - 영상 데모 : https://drive.google.com/file/d/1J9KmX8cV_Fc-GXkzkSxVyD4HmJvzy8ZA/view?usp=drive_link
-생성형 AI를 활용하여 소상공인이 디자인 역량 없이도 **광고 이미지**와 **카피**를 자동 제작하는 서비스입니다.
+- 생성형 AI를 활용하여 소상공인이 디자인 역량 없이도 **광고 이미지**와 **카피**를 자동 제작하는 서비스입니다.
 
 # 보고서
 📄 [프로젝트 보고서](docs/7팀_보고서.pdf)
